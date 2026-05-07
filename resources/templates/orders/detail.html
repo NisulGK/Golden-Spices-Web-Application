@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::main}, 'Order Details')}">
+
+<main>
+  <div class="container py-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/orders" class="golden-link">My Orders</a></li>
+        <li class="breadcrumb-item active" th:text="${order.orderNumber}">ORD000</li>
+      </ol>
+    </nav>
+
+    <!-- Flash messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-circle me-2"></i><span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="order-detail-grid">
+
+      <!-- ═══════════════════════════════════
+           LEFT: Order Info + Items
+      ═══════════════════════════════════ -->
+      <div class="order-left">
+
+        <!-- Order Header -->
+        <div class="card mb-4">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-title" th:text="${order.orderNumber}">ORD000</h2>
+              <p class="text-muted small"
+                 th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, hh:mm a')}"></p>
+            </div>
+            <div class="status-badges">
+              <span class="badge"
+                    th:classappend="'badge-' + ${order.status.name().toLowerCase()}"
+                    th:text="${order.status}">PENDING</span>
+              <span class="badge"
+                    th:classappend="${order.paymentStatus.name() == 'PAID'} ? 'badge-success' : 'badge-warning'"
+                    th:text="${order.paymentStatus}">PENDING</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="card mb-4">
+          <h3 class="section-title">Order Items</h3>
+          <div class="order-items-table">
+            <div class="oi-header">
+              <span>Product</span>
+              <span>Size</span>
+              <span>Unit Price</span>
+              <span>Qty</span>
+              <span>Subtotal</span>
+            </div>
+            <!--
+              item.productName / productSize / unitPrice / quantity / subtotal
+              are all snapshot columns on OrderItem — no lazy Product proxy needed.
+            -->
+            <div class="oi-row" th:each="item : ${order.items}">
+              <span class="oi-name"  th:text="${item.productName}">Product</span>
+              <span class="oi-size badge badge-outline" th:text="${item.productSize}">1kg</span>
+              <span class="oi-price"
+                    th:text="'LKR ' + ${#numbers.formatDecimal(item.unitPrice,1,'COMMA',2,'POINT')}">LKR 0</span>
+              <span class="oi-qty">× <strong th:text="${item.quantity}">1</strong></span>
+              <span class="oi-subtotal gold-text"
+                    th:text="'LKR ' + ${#numbers.formatDecimal(item.subtotal,1,'COMMA',2,'POINT')}">LKR 0</span>
+            </div>
+            <div class="oi-total-row">
+              <span>Total</span>
+              <span class="gold-text fw-bold"
+                    th:text="'LKR ' + ${#numbers.formatDecimal(order.totalAmount,1,'COMMA',2,'POINT')}">
+                LKR 0
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivery Info -->
+        <div class="card mb-4">
+          <h3 class="section-title">Delivery Information</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Name</span>
+              <span th:text="${order.customerName}">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span th:text="${order.customerEmail}">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Phone</span>
+              <span th:text="${order.customerPhone}">—</span>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Address</span>
+              <span th:text="${order.deliveryAddress}">—</span>
+            </div>
+            <div class="info-item full-width" th:if="${order.notes}">
+              <span class="info-label">Notes</span>
+              <span th:text="${order.notes}">—</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /order-left -->
+
+      <!-- ═══════════════════════════════════
+           RIGHT: Tracking Timeline
+      ═══════════════════════════════════ -->
+      <div class="order-right">
+        <div class="card tracking-card">
+          <h3 class="section-title">
+            <span class="icon">📦</span> Order Tracking
+          </h3>
+
+          <!--
+            Progress Steps — covers all 7 statuses in OrderStatus:
+            PENDING, CONFIRMED, PROCESSING, SHIPPED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
+
+            Each step evaluates using th:with="s=${order.status.name()}" so we compare
+            plain strings — no SpEL enum comparison issues.
+
+            Step classes:
+              done   = order has passed this step
+              active = order is currently at this step
+              (blank) = not reached yet
+          -->
+          <div class="tracking-progress" th:with="s=${order.status.name()}">
+
+            <!-- 1. PENDING (always done or active — order exists) -->
+            <div th:class="'tp-step '
+              + (${#strings.equals(s,'PENDING')} ? 'active'
+              : (${#strings.equals(s,'CANCELLED')} ? 'done'
+              : 'done'))">
+              <div class="tp-dot"></div>
+              <span class="tp-label">Placed</span>
+            </div>
+
+            <!-- 2. CONFIRMED -->
+            <div th:class="'tp-step '
+              + (${#strings.equals(s,'CONFIRMED')} ? 'active'
+              : (${#strings.equals(s,'PROCESSING') or #strings.equals(s,'SHIPPED')
+                 or #strings.equals(s,'OUT_FOR_DELIVERY') or #strings.equals(s,'DELIVERED')} ? 'done'
+              : ''))">
+              <div class="tp-dot"></div>
+              <span class="tp-label">Confirmed</span>
+            </div>
+
+            <!-- 3. PROCESSING -->
+            <div th:class="'tp-step '
+              + (${#strings.equals(s,'PROCESSING')} ? 'active'
+              : (${#strings.equals(s,'SHIPPED') or #strings.equals(s,'OUT_FOR_DELIVERY')
+                 or #strings.equals(s,'DELIVERED')} ? 'done'
+              : ''))">
+              <div class="tp-dot"></div>
+              <span class="tp-label">Processing</span>
+            </div>
+
+            <!-- 4. SHIPPED -->
+            <div th:class="'tp-step '
+              + (${#strings.equals(s,'SHIPPED')} ? 'active'
+              : (${#strings.equals(s,'OUT_FOR_DELIVERY') or #strings.equals(s,'DELIVERED')} ? 'done'
+              : ''))">
+              <div class="tp-dot"></div>
+              <span class="tp-label">Shipped</span>
+            </div>
+
+            <!-- 5. OUT_FOR_DELIVERY -->
+            <div th:class="'tp-step '
+              + (${#strings.equals(s,'OUT_FOR_DELIVERY')} ? 'active'
+              : (${#strings.equals(s,'DELIVERED')} ? 'done'
+              : ''))">
+              <div class="tp-dot"></div>
+              <span class="tp-label">Out for Delivery</span>
+            </div>
+
+            <!-- 6. DELIVERED -->
+            <div th:class="'tp-step '
+              + (${#strings.equals(s,'DELIVERED')} ? 'done active' : '')">
+              <div class="tp-dot"></div>
+              <span class="tp-label">Delivered</span>
+            </div>
+
+          </div>
+          <!-- end tracking-progress -->
+
+          <!-- Cancelled notice (shown above the empty timeline) -->
+          <div th:if="${#strings.equals(order.status.name(), 'CANCELLED')}"
+               class="alert alert-danger mb-3">
+            <i class="bi bi-x-circle me-2"></i>
+            This order has been cancelled. Please contact us if you need assistance.
+          </div>
+
+          <!-- Timeline Events -->
+          <div class="tracking-timeline" th:if="${not #lists.isEmpty(trackingEvents)}">
+            <div class="tl-event" th:each="event : ${trackingEvents}">
+              <div class="tl-dot"
+                   th:classappend="${#strings.equals(event.status.name(),'DELIVERED')} ? 'tl-dot-success'
+                                 : (${#strings.equals(event.status.name(),'CANCELLED')} ? 'tl-dot-danger'
+                                 : 'tl-dot-primary')">
+              </div>
+              <div class="tl-content">
+                <div class="tl-title" th:text="${event.title}">Title</div>
+                <div class="tl-desc"  th:text="${event.description}">Description</div>
+                <div class="tl-time"
+                     th:text="${#temporals.format(event.createdAt, 'dd MMM yyyy, hh:mm a')}">Time</div>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${#lists.isEmpty(trackingEvents)}" class="no-tracking">
+            <p>No tracking events yet. Check back soon.</p>
+          </div>
+
+        </div><!-- /tracking-card -->
+
+        <!-- Back button -->
+        <div class="mt-3 text-center">
+          <a href="/orders" class="btn btn-outline">← Back to My Orders</a>
+        </div>
+      </div><!-- /order-right -->
+
+    </div><!-- /order-detail-grid -->
+  </div>
+
+  <style>
+    .golden-link { color: #D4AF37 !important; text-decoration: none; }
+    .golden-link:hover { text-decoration: underline; }
+
+    .order-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* Cards */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.07);
+      padding: 24px;
+    }
+    .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
+    .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; }
+    .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 18px; }
+    .status-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .badge-pending          { background: #FEF3C7; color: #92400E; }
+    .badge-confirmed        { background: #DBEAFE; color: #1E40AF; }
+    .badge-processing       { background: #EDE9FE; color: #5B21B6; }
+    .badge-shipped          { background: #D1FAE5; color: #065F46; }
+    .badge-out_for_delivery { background: #D1FAE5; color: #065F46; }
+    .badge-delivered        { background: #D1FAE5; color: #065F46; }
+    .badge-cancelled        { background: #FEE2E2; color: #991B1B; }
+    .badge-success          { background: #D1FAE5; color: #065F46; }
+    .badge-warning          { background: #FEF3C7; color: #92400E; }
+    .badge-outline          { background: transparent; border: 1px solid #ddd; color: #6b7280; font-size: 0.72rem; }
+
+    /* Order items table */
+    .order-items-table { font-size: 0.9rem; }
+    .oi-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.2fr .6fr 1.2fr;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #6b7280;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+    .oi-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.2fr .6fr 1.2fr;
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+    }
+    .oi-row:last-child { border-bottom: none; }
+    .oi-total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 12px 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-top: 2px solid #f0f0f0;
+      margin-top: 6px;
+    }
+    .gold-text { color: #c8841f; }
+    .fw-bold   { font-weight: 700; }
+
+    /* Info grid */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .info-item { display: flex; flex-direction: column; gap: 2px; }
+    .info-item.full-width { grid-column: 1 / -1; }
+    .info-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    /* ── Tracking progress bar ── */
+    .tracking-progress {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      margin-bottom: 28px;
+      padding: 0 6px;
+    }
+    .tracking-progress::before {
+      content: '';
+      position: absolute;
+      top: 13px;
+      left: 20px;
+      right: 20px;
+      height: 3px;
+      background: #e5e7eb;
+      z-index: 0;
+    }
+    .tp-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 1;
+      flex: 1;
+    }
+    .tp-dot {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      border: 3px solid #e5e7eb;
+      transition: all .3s;
+    }
+    .tp-step.done   .tp-dot { background: #27ae60; border-color: #27ae60; }
+    .tp-step.active .tp-dot {
+      background: #c8841f;
+      border-color: #c8841f;
+      box-shadow: 0 0 0 4px rgba(200,132,31,.2);
+    }
+    .tp-label {
+      font-size: 0.6rem;
+      text-align: center;
+      color: #9ca3af;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      white-space: nowrap;
+    }
+    .tp-step.done .tp-label,
+    .tp-step.active .tp-label { color: #1a1208; }
+
+    /* ── Timeline ── */
+    .tracking-timeline { display: flex; flex-direction: column; gap: 0; }
+    .tl-event {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+    .tl-event::before {
+      content: '';
+      position: absolute;
+      left: 9px; top: 22px;
+      bottom: 0;
+      width: 2px;
+      background: #e5e7eb;
+    }
+    .tl-event:last-child::before { display: none; }
+    .tl-dot {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .tl-dot-primary { background: #c8841f; }
+    .tl-dot-success { background: #27ae60; }
+    .tl-dot-danger  { background: #e74c3c; }
+    .tl-content { flex: 1; }
+    .tl-title { font-weight: 600; font-size: 0.9rem; color: #1a1208; }
+    .tl-desc  { font-size: 0.83rem; color: #6b7280; margin-top: 2px; }
+    .tl-time  { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
+
+    .tracking-card .icon { font-size: 1.1rem; }
+    .no-tracking { text-align: center; color: #6b7280; padding: 20px 0; font-size: 0.9rem; }
+
+    .btn-outline {
+      display: inline-block;
+      padding: 9px 22px;
+      border: 1.5px solid #e8dfc9;
+      border-radius: 8px;
+      color: #7a6444;
+      text-decoration: none;
+      font-size: .84rem;
+      font-weight: 600;
+      transition: .2s;
+    }
+    .btn-outline:hover { border-color: #c8841f; color: #c8841f; background: #fdf4e3; }
+
+    @media (max-width: 900px) {
+      .order-detail-grid { grid-template-columns: 1fr; }
+      .oi-header, .oi-row { grid-template-columns: 2fr 1fr 1fr .5fr 1fr; font-size: 0.8rem; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</main>
+
+</html>

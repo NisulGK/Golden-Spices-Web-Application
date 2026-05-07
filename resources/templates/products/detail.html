@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, ${product.brand + ' ' + product.name})}">
+
+<main>
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a th:href="@{/products}">Products</a>
+                </li>
+                <li class="breadcrumb-item active"
+                    th:text="${product.name}">
+                </li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+
+            <!-- ================= IMAGE ================= -->
+            <div class="col-lg-5">
+                <div class="card p-3">
+                    <img th:src="@{${product.imageUrl}}"
+                         onerror="this.src='/images/products/default-product.png'"
+                         style="width:100%; max-height:520px; object-fit:contain;">
+                </div>
+            </div>
+
+            <!-- ================= DETAILS ================= -->
+            <div class="col-lg-7">
+
+                <!-- BADGES -->
+                <div class="d-flex align-items-center gap-2 mb-2">
+
+                    <span class="badge bg-dark"
+                          th:text="${product.brand}">
+                    </span>
+
+                    <!-- STOCK STATUS -->
+                    <span class="badge"
+                          th:classappend="${product.stockQty == 0} ? 'bg-danger' :
+                                          (${product.stockQty <= 5} ? 'bg-warning text-dark' : 'bg-success')"
+                          th:text="${product.stockQty == 0} ? 'Out of Stock' :
+                                   (${product.stockQty <= 5} ? 'Low Stock' : 'In Stock')">
+                    </span>
+
+                </div>
+
+                <h2 th:text="${product.name}"></h2>
+
+                <p class="text-muted mb-3">
+                    Size:
+                    <strong th:text="${product.sizeLabel}"></strong>
+                    |
+                    Stock:
+                    <strong th:text="${product.stockQty}"></strong>
+                </p>
+
+                <h3 class="text-primary mb-4">
+                    LKR
+                    <span th:text="${#numbers.formatDecimal(product.priceLkr,0,2)}"></span>
+                </h3>
+
+                <!-- ================= ADD TO CART ================= -->
+                <form th:action="@{/cart/add}" method="post">
+
+                    <input type="hidden"
+                           name="productId"
+                           th:value="${product.id}"/>
+
+                    <div class="row g-2 align-items-center">
+
+                        <div class="col-4">
+                            <input type="number"
+                                   name="qty"
+                                   class="form-control text-center"
+                                   value="1"
+                                   min="1"
+                                   th:max="${product.stockQty}"
+                                   th:disabled="${product.stockQty == 0}">
+                        </div>
+
+                        <div class="col-8">
+                            <button type="submit"
+                                    class="btn w-100"
+                                    th:classappend="${product.stockQty == 0} ? 'btn-secondary' : 'btn-primary'"
+                                    th:disabled="${product.stockQty == 0}">
+                                <i class="bi bi-cart-plus"></i>
+                                <span th:text="${product.stockQty == 0} ? 'Out of Stock' : 'Add to Cart'">
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- 🔥 REVIEW BUTTON -->
+                        <div class="col-12 mt-2">
+                            <a class="btn btn-outline-primary w-100"
+                               th:href="@{/products/{id}/reviews(id=${product.id})}">
+                                <i class="bi bi-chat-left-text"></i>
+                                View Reviews
+                            </a>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <a class="btn btn-outline-secondary w-100"
+                               th:href="@{/products}">
+                                Back to Products
+                            </a>
+                        </div>
+
+                    </div>
+                </form>
+
+                <!-- OUT OF STOCK ALERT -->
+                <div class="alert alert-danger mt-3"
+                     th:if="${product.stockQty == 0}">
+                    This item is currently unavailable.
+                </div>
+
+                <!-- ================= DESCRIPTION ================= -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5>Product Details</h5>
+
+                        <p th:if="${product.description != null and !#strings.isEmpty(product.description)}"
+                           th:text="${product.description}">
+                        </p>
+
+                        <p class="text-muted"
+                           th:if="${product.description == null or #strings.isEmpty(product.description)}">
+                            No description available.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+</html>

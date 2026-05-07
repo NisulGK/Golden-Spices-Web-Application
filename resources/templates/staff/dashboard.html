@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Staff Dashboard')}">
+<main>
+    <style>
+        :root{--g:#c8841f;--gd:#8a5c0c;--gl:#e8a94a;--gp:#fdf4e3;--gpp:#f0d898;--dk:#1a1208;--bd:#3d2e14;--mu:#7a6444;--wh:#fff;--of:#faf7f2;--br:#e8dfc9;}
+        .sd-wrap{max-width:1200px;margin:0 auto;padding:36px 36px 72px;font-family:'Jost',sans-serif;}
+
+        /* Header */
+        .sd-hd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+        .sd-title-tag{font-size:.63rem;letter-spacing:5px;text-transform:uppercase;color:var(--g);font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:10px;}
+        .sd-title-tag::before{content:'';width:26px;height:2px;background:linear-gradient(90deg,var(--gd),var(--g));border-radius:2px;}
+        .sd-title{font-family:'Cinzel',serif;font-size:1.8rem;font-weight:700;color:var(--dk);}
+
+        /* Stats */
+        .sd-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+        .sd-stat{background:var(--wh);border:1px solid var(--br);border-radius:12px;padding:16px 18px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+        .sd-stat-n{font-family:'Cinzel',serif;font-size:1.7rem;font-weight:700;color:var(--g);line-height:1;}
+        .sd-stat-l{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-top:4px;}
+
+        /* Table */
+        .sd-table-wrap{background:var(--wh);border:1px solid var(--br);border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);}
+        .sd-table-hd{padding:20px 24px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;}
+        .sd-table-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--dk);display:flex;align-items:center;gap:9px;}
+        .sd-table-title i{color:var(--g);}
+        table{width:100%;border-collapse:collapse;}
+        th{background:var(--of);padding:12px 16px;text-align:left;font-size:.72rem;font-weight:700;color:var(--mu);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--br);}
+        td{padding:14px 16px;border-bottom:1px solid var(--br);font-size:.88rem;color:var(--bd);vertical-align:middle;}
+        tr:last-child td{border-bottom:none;}
+        tr:hover td{background:#fdf9f3;}
+
+        /* Status badge */
+        .st{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:4px 12px;font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+        .st-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+        .PENDING         .st-dot{background:#e67e22;} .PENDING         {background:#fff8f0;border:1px solid #f0c898;color:#8a5c0c;}
+        .CONFIRMED       .st-dot{background:#3a6adf;} .CONFIRMED       {background:#f0f4ff;border:1px solid #b8c8f5;color:#1a3a8a;}
+        .PROCESSING      .st-dot{background:var(--g);animation:p 1.4s infinite;} .PROCESSING{background:var(--gp);border:1px solid var(--gpp);color:var(--gd);}
+        .SHIPPED         .st-dot{background:#27ae60;animation:p 1.4s infinite;} .SHIPPED{background:#f0faf5;border:1px solid #a8e6c5;color:#1a5a30;}
+        .OUT_FOR_DELIVERY .st-dot{background:#1a7a46;animation:p 1.4s infinite;} .OUT_FOR_DELIVERY{background:#edfaf3;border:1px solid #7dd4a0;color:#145a28;}
+        .DELIVERED       .st-dot{background:#1a5a30;} .DELIVERED{background:#edfaf3;border:1px solid #7dd4a0;color:#145a28;}
+        .CANCELLED       .st-dot{background:#e74c3c;} .CANCELLED{background:#fff4f4;border:1px solid #f5b8b8;color:#a31515;}
+        @keyframes p{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+
+        /* Update form inline */
+        .update-form{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+        .f-sel{padding:7px 10px;border:1.5px solid var(--br);border-radius:7px;font-size:.8rem;font-family:'Jost',sans-serif;color:var(--bd);background:var(--of);outline:none;cursor:pointer;transition:.2s;}
+        .f-sel:focus{border-color:var(--g);}
+        .f-inp{padding:7px 10px;border:1.5px solid var(--br);border-radius:7px;font-size:.8rem;font-family:'Jost',sans-serif;color:var(--bd);background:var(--of);outline:none;width:130px;transition:.2s;}
+        .f-inp:focus{border-color:var(--g);}
+        .btn-upd{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;border-radius:7px;font-size:.8rem;font-weight:700;font-family:'Jost',sans-serif;cursor:pointer;transition:.2s;}
+        .btn-upd:hover{background:linear-gradient(135deg,var(--g),var(--gl));}
+
+        .order-num{font-family:'Cinzel',serif;font-weight:700;color:var(--dk);font-size:.88rem;}
+        .cust-name{font-weight:600;color:var(--dk);}
+        .cust-email{font-size:.77rem;color:var(--mu);}
+        .addr-cell{font-size:.8rem;color:var(--mu);max-width:200px;line-height:1.4;}
+        .eta-cell{font-size:.8rem;color:var(--bd);font-weight:600;}
+        .loc-cell{font-size:.8rem;color:var(--g);font-weight:600;display:flex;align-items:center;gap:4px;}
+
+        @media(max-width:900px){.sd-stats{grid-template-columns:repeat(3,1fr);}.sd-wrap{padding:20px 14px 52px;}}
+    </style>
+
+    <div class="sd-wrap">
+        <div class="sd-hd">
+            <div>
+                <div class="sd-title-tag">Delivery Staff Panel</div>
+                <h1 class="sd-title"><i class="bi bi-truck" style="color:var(--g)"></i> Staff Dashboard</h1>
+            </div>
+            <a th:href="@{/admin/dashboard}" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border:1.5px solid var(--br);border-radius:8px;color:var(--mu);text-decoration:none;font-size:.84rem;font-weight:600;background:var(--wh);">
+                <i class="bi bi-speedometer2"></i> Admin Panel
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="sd-stats">
+            <div class="sd-stat">
+                <div class="sd-stat-n" th:text="${#lists.size(allOrders)}">0</div>
+                <div class="sd-stat-l">Total</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-n" th:text="${#lists.size(activeOrders)}">0</div>
+                <div class="sd-stat-l">Active</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-n" th:text="${totalDelivered != null} ? ${totalDelivered} : '-'">-</div>
+                <div class="sd-stat-l">Delivered</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-n" th:text="${totalShipped != null} ? ${totalShipped} : '-'">-</div>
+                <div class="sd-stat-l">Shipped</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-n" th:text="${totalPending != null} ? ${totalPending} : '-'">-</div>
+                <div class="sd-stat-l">Pending</div>
+            </div>
+        </div>
+
+        <!-- Active Orders Table -->
+        <div class="sd-table-wrap">
+            <div class="sd-table-hd">
+                <div class="sd-table-title">
+                    <i class="bi bi-list-check"></i> Active Orders
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(activeOrders)}"
+                 style="text-align:center;padding:48px;color:var(--mu);font-size:.9rem;">
+                <i class="bi bi-check-all" style="font-size:2rem;display:block;margin-bottom:12px;color:#d8cbb8"></i>
+                No active orders right now.
+            </div>
+
+            <div class="table-responsive" th:if="${!#lists.isEmpty(activeOrders)}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Delivery Address</th>
+                        <th>ETA</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Update</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="o : ${activeOrders}">
+                        <td>
+                            <div class="order-num" th:text="${o.orderNumber}">ORD</div>
+                            <div style="font-size:.74rem;color:var(--mu)" th:text="${#temporals.format(o.createdAt,'dd MMM yyyy')}">Date</div>
+                        </td>
+                        <td>
+                            <div class="cust-name" th:text="${o.customerName}">Name</div>
+                            <div class="cust-email" th:text="${o.customerPhone}">Phone</div>
+                        </td>
+                        <td>
+                            <div class="addr-cell" th:text="${o.deliveryAddress}">Address</div>
+                        </td>
+                        <td>
+                            <div class="eta-cell"
+                                 th:text="${o.estimatedDelivery != null} ? ${#temporals.format(o.estimatedDelivery,'dd MMM')} : 'TBD'">
+                                ETA
+                            </div>
+                        </td>
+                        <td>
+                            <div class="loc-cell" th:if="${o.currentLocation != null}">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                <span th:text="${o.currentLocation}">City</span>
+                            </div>
+                            <span th:if="${o.currentLocation == null}" style="color:var(--br)">—</span>
+                        </td>
+                        <td>
+                            <div th:class="${o.status.toString()} + ' st'">
+                                <span class="st-dot"></span>
+                                <span th:text="${o.status}">PENDING</span>
+                            </div>
+                        </td>
+                        <td>
+                            <form th:action="@{/staff/orders/{id}/status(id=${o.id})}" method="post">
+                                <div class="update-form">
+                                    <select class="f-sel" name="status">
+                                        <option th:each="s : ${statuses}"
+                                                th:value="${s}"
+                                                th:text="${s}"
+                                                th:selected="${s == o.status}">Status</option>
+                                    </select>
+                                    <input class="f-inp" type="text" name="location"
+                                           th:value="${o.currentLocation}"
+                                           placeholder="City / Area">
+                                    <input type="text" name="note" class="f-inp" placeholder="Note (optional)" style="width:120px">
+                                    <button type="submit" class="btn-upd">
+                                        <i class="bi bi-arrow-repeat"></i> Update
+                                    </button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</html>

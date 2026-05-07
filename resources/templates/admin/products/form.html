@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, ${product.id != null ? 'Edit Product' : 'Add Product'})}">
+
+<main>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+
+                    <!-- HEADER -->
+                    <div class="card-header bg-gold text-dark">
+                        <h4 class="mb-0">
+                            <i class="bi bi-box-seam"></i>
+                            <span th:text="${product.id != null ? 'Edit Product' : 'Add New Product'}"></span>
+                        </h4>
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="card-body p-4">
+
+                        <form th:action="${product.id != null ? '/admin/products/' + product.id + '/edit' : '/admin/products/new'}"
+                              method="post">
+
+                            <!-- BRAND + NAME -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Brand *</label>
+                                    <input type="text" name="brand" class="form-control"
+                                           th:value="${product.brand}"
+                                           placeholder="GOLDEN" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Product Name *</label>
+                                    <input type="text" name="name" class="form-control"
+                                           th:value="${product.name}"
+                                           placeholder="Chilli Pieces" required>
+                                </div>
+                            </div>
+
+                            <!-- SIZE / PRICE / STOCK -->
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Size *</label>
+                                    <input type="text" name="sizeLabel" class="form-control"
+                                           th:value="${product.sizeLabel}"
+                                           placeholder="1kg" required>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Price (LKR) *</label>
+                                    <input type="number" name="priceLkr" class="form-control"
+                                           step="0.01" min="0"
+                                           th:value="${product.priceLkr}"
+                                           placeholder="2000.00" required>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Stock Quantity *</label>
+                                    <input type="number" name="stockQty" class="form-control"
+                                           min="0"
+                                           th:value="${product.stockQty != null ? product.stockQty : 0}"
+                                           placeholder="100" required>
+                                </div>
+                            </div>
+
+                            <!-- DESCRIPTION -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Description</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Enter product description"
+                                          th:text="${product.description}"></textarea>
+                            </div>
+
+                            <!-- ✅ FIXED IMAGE FIELD -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Image Path (Optional)</label>
+
+                                <input type="text"
+                                       name="imageUrl"
+                                       class="form-control"
+                                       th:value="${product.imageUrl}"
+                                       placeholder="/images/products/chilli-pieces.jpg">
+
+                                <small class="text-muted">
+                                    Example: /images/products/chilli-pieces.jpg
+                                </small>
+                            </div>
+
+                            <!-- ACTIVE -->
+                            <div class="form-check mb-4">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="active"
+                                       id="activeCheck"
+                                       value="true"
+                                       th:checked="${product.active == null or product.active}">
+                                <label class="form-check-label" for="activeCheck">
+                                    Active (visible to customers)
+                                </label>
+                            </div>
+
+                            <!-- BUTTONS -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span th:text="${product.id != null ? 'Update Product' : 'Add Product'}"></span>
+                                </button>
+
+                                <a th:href="@{/admin/products}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+</html>

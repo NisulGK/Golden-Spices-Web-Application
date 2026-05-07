@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'My Addresses')}">
+<main>
+    <style>
+        :root{--g:#c8841f;--gd:#8a5c0c;--gl:#e8a94a;--gp:#fdf4e3;--gpp:#f0d898;--dk:#1a1208;--bd:#3d2e14;--mu:#7a6444;--wh:#fff;--of:#faf7f2;--br:#e8dfc9;}
+        .addr-wrap{max-width:960px;margin:0 auto;padding:40px 32px 72px;font-family:'Jost',sans-serif;}
+        .addr-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap;}
+        .addr-title-tag{font-size:.63rem;letter-spacing:5px;text-transform:uppercase;color:var(--g);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+        .addr-title-tag::before{content:'';width:26px;height:2px;background:linear-gradient(90deg,var(--gd),var(--g));border-radius:2px;}
+        .addr-title{font-family:'Cinzel',serif;font-size:1.9rem;font-weight:700;color:var(--dk);}
+        .btn-add{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border-radius:9px;text-decoration:none;font-size:.86rem;font-weight:700;font-family:'Jost',sans-serif;transition:.25s;box-shadow:0 4px 16px rgba(200,132,31,.30);}
+        .btn-add:hover{background:linear-gradient(135deg,var(--g),var(--gl));color:#fff;transform:translateY(-1px);}
+
+        /* Grid */
+        .addr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
+
+        /* Card */
+        .addr-card{background:var(--wh);border:1.5px solid var(--br);border-radius:16px;padding:24px 26px;box-shadow:0 3px 16px rgba(0,0,0,.06);transition:.28s;position:relative;overflow:hidden;}
+        .addr-card:hover{box-shadow:0 8px 30px rgba(0,0,0,.10);border-color:rgba(200,132,31,.22);transform:translateY(-2px);}
+        .addr-card.default-card{border-color:var(--g);box-shadow:0 4px 20px rgba(200,132,31,.18);}
+        .addr-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--gd),var(--g));border-radius:4px 0 0 4px;}
+
+        .addr-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+        .addr-label{display:inline-flex;align-items:center;gap:7px;font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;color:var(--dk);}
+        .addr-label i{color:var(--g);}
+        .badge-default{background:var(--g);color:#fff;border-radius:20px;padding:3px 12px;font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+
+        .addr-name{font-weight:700;color:var(--dk);font-size:.95rem;margin-bottom:4px;}
+        .addr-phone{font-size:.82rem;color:var(--mu);margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+        .addr-text{font-size:.88rem;color:var(--bd);line-height:1.7;}
+
+        /* Actions */
+        .addr-actions{display:flex;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--br);flex-wrap:wrap;}
+        .btn-addr{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:7px;font-size:.8rem;font-weight:600;font-family:'Jost',sans-serif;cursor:pointer;transition:.2s;text-decoration:none;border:1.5px solid var(--br);background:var(--wh);color:var(--mu);}
+        .btn-addr:hover{border-color:var(--g);color:var(--g);background:var(--gp);}
+        .btn-addr.danger{border-color:rgba(163,21,21,.2);color:#a31515;}
+        .btn-addr.danger:hover{background:rgba(163,21,21,.05);border-color:rgba(163,21,21,.45);}
+        .btn-addr.primary{background:var(--g);color:#fff;border-color:var(--g);}
+        .btn-addr.primary:hover{background:var(--gd);border-color:var(--gd);}
+
+        /* Empty */
+        .addr-empty{text-align:center;padding:64px 24px;background:var(--of);border-radius:16px;border:1px dashed var(--br);}
+        .addr-empty i{font-size:3rem;color:#d8cbb8;margin-bottom:16px;display:block;}
+        .addr-empty-t{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--dk);margin-bottom:8px;}
+        .addr-empty-s{font-size:.88rem;color:var(--mu);margin-bottom:24px;}
+
+        @media(max-width:640px){.addr-grid{grid-template-columns:1fr;}.addr-wrap{padding:24px 16px 52px;}}
+    </style>
+
+    <div class="addr-wrap">
+        <div class="addr-hd">
+            <div>
+                <div class="addr-title-tag">Delivery Settings</div>
+                <h1 class="addr-title"><i class="bi bi-geo-alt" style="color:var(--g)"></i> My Addresses</h1>
+            </div>
+            <a th:href="@{/addresses/new}" class="btn-add">
+                <i class="bi bi-plus-circle"></i> Add New Address
+            </a>
+        </div>
+
+        <!-- Empty state -->
+        <div class="addr-empty" th:if="${#lists.isEmpty(addresses)}">
+            <i class="bi bi-geo-alt"></i>
+            <div class="addr-empty-t">No Saved Addresses</div>
+            <p class="addr-empty-s">Add a delivery address to make checkout faster.</p>
+            <a th:href="@{/addresses/new}" class="btn-add">
+                <i class="bi bi-plus-circle"></i> Add Your First Address
+            </a>
+        </div>
+
+        <!-- Address Grid -->
+        <div class="addr-grid" th:if="${!#lists.isEmpty(addresses)}">
+            <div th:each="addr : ${addresses}"
+                 th:class="${addr.isDefault} ? 'addr-card default-card' : 'addr-card'">
+
+                <div class="addr-card-top">
+                    <div class="addr-label">
+                        <i class="bi bi-house-door"></i>
+                        <span th:text="${addr.label}">Home</span>
+                    </div>
+                    <span class="badge-default" th:if="${addr.isDefault}">Default</span>
+                </div>
+
+                <div class="addr-name" th:text="${addr.recipientName}">Name</div>
+                <div class="addr-phone">
+                    <i class="bi bi-telephone" style="color:var(--g)"></i>
+                    <span th:text="${addr.phone}">Phone</span>
+                </div>
+                <div class="addr-text">
+                    <span th:text="${addr.addressLine1}">Line 1</span><br>
+                    <span th:if="${addr.addressLine2 != null and !addr.addressLine2.isBlank()}"
+                          th:text="${addr.addressLine2 + ', '}"></span>
+                    <span th:text="${addr.city}">City</span>
+                    <span th:if="${addr.district != null and !addr.district.isBlank()}"
+                          th:text="', ' + ${addr.district}"></span>
+                    <span th:text="' ' + ${addr.postalCode}">00000</span>
+                </div>
+
+                <div class="addr-actions">
+                    <a th:href="@{/addresses/{id}/edit(id=${addr.id})}" class="btn-addr">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <form th:unless="${addr.isDefault}"
+                          th:action="@{/addresses/{id}/default(id=${addr.id})}" method="post" style="display:inline">
+                        <button type="submit" class="btn-addr primary">
+                            <i class="bi bi-star"></i> Set Default
+                        </button>
+                    </form>
+                    <form th:action="@{/addresses/{id}/delete(id=${addr.id})}" method="post" style="display:inline"
+                          onsubmit="return confirm('Delete this address?')">
+                        <button type="submit" class="btn-addr danger">
+                            <i class="bi bi-trash3"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back link -->
+        <div style="margin-top:32px">
+            <a th:href="@{/orders}" style="display:inline-flex;align-items:center;gap:7px;color:var(--mu);font-size:.84rem;text-decoration:none;font-weight:600;">
+                <i class="bi bi-arrow-left"></i> Back to My Orders
+            </a>
+        </div>
+    </div>
+</main>
+</html>

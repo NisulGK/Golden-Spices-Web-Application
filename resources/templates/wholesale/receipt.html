@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Payment Receipt')}">
+
+<main>
+  <div class="rec-root">
+
+    <!-- ── BREADCRUMB ── -->
+    <div class="rec-breadcrumb">
+      <a th:href="@{/wholesale}" class="rec-breadcrumb-link">
+        <i class="bi bi-house-fill"></i> Wholesale
+      </a>
+      <i class="bi bi-chevron-right"></i>
+      <span>Payment Receipt</span>
+    </div>
+
+    <!-- ── SUCCESS BANNER ── -->
+    <div class="rec-success-banner">
+      <div class="rec-success-rings">
+        <div class="rec-check-circle">
+          <i class="bi bi-check-lg"></i>
+        </div>
+      </div>
+      <div>
+        <div class="rec-success-title">Payment Successful!</div>
+        <div class="rec-success-sub">
+          Your wholesale order has been confirmed and is now being processed.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RECEIPT CARD (printable) ── -->
+    <div class="rec-receipt" id="printArea">
+
+      <!-- Receipt Header -->
+      <div class="rec-receipt-head">
+        <div class="rec-receipt-logo">
+          <i class="bi bi-building-fill-gear"></i>
+          <div>
+            <div class="rec-company-name">Golden Wholesale</div>
+            <div class="rec-company-sub">Official Payment Receipt</div>
+          </div>
+        </div>
+        <div class="rec-receipt-meta">
+          <div class="rec-paid-stamp">
+            <div class="rec-paid-inner">PAID</div>
+          </div>
+          <div class="rec-receipt-date"
+               th:text="${order.createdAt != null ?
+                         #temporals.format(order.createdAt, 'dd MMMM yyyy') : '—'}">—</div>
+          <div class="rec-receipt-time"
+               th:text="${order.createdAt != null ?
+                         #temporals.format(order.createdAt, 'HH:mm:ss') + ' LKT' : '—'}">—</div>
+        </div>
+      </div>
+
+      <div class="rec-receipt-divider rec-dash"></div>
+
+      <!-- Order & Customer Details -->
+      <div class="rec-details-grid">
+
+        <div class="rec-details-col">
+          <div class="rec-details-label">Bill To</div>
+          <div class="rec-details-name"
+               th:text="${user != null ? user.fullName : '—'}">—</div>
+          <div class="rec-details-val"
+               th:text="${user != null ? user.email : '—'}">—</div>
+          <div class="rec-details-val"
+               th:if="${user != null and user.phone != null}"
+               th:text="${user.phone}">—</div>
+          <div class="rec-details-badge">Wholesale Account</div>
+        </div>
+
+        <div class="rec-details-col rec-details-col--right">
+          <div class="rec-details-label">Receipt Details</div>
+          <div class="rec-ref-row">
+            <span class="rec-ref-lbl">Order ID</span>
+            <span class="rec-ref-val" th:text="'#' + ${order.id}">—</span>
+          </div>
+          <div class="rec-ref-row">
+            <span class="rec-ref-lbl">Order Status</span>
+            <span class="rec-status-pill rec-status-pending"
+                  th:if="${order.status == 'PENDING'}">
+                        <i class="bi bi-clock-fill"></i> Pending
+                    </span>
+            <span class="rec-status-pill rec-status-approved"
+                  th:if="${order.status == 'APPROVED'}">
+                        <i class="bi bi-check-circle-fill"></i> Approved
+                    </span>
+            <span class="rec-status-pill rec-status-shipped"
+                  th:if="${order.status == 'SHIPPED'}">
+                        <i class="bi bi-truck-front-fill"></i> Shipped
+                    </span>
+          </div>
+          <div class="rec-ref-row">
+            <span class="rec-ref-lbl">Payment</span>
+            <span class="rec-pay-pill rec-pay-paid">
+                        <i class="bi bi-check-lg"></i> Card Payment
+                    </span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="rec-receipt-divider rec-dash"></div>
+
+      <!-- Item Table -->
+      <table class="rec-items-table">
+        <thead>
+        <tr>
+          <th class="rec-th-item">Item Description</th>
+          <th class="rec-th-num">Qty</th>
+          <th class="rec-th-num">Unit Price</th>
+          <th class="rec-th-num">Amount</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="rec-item-row">
+          <td>
+            <div class="rec-item-name"
+                 th:text="${order.product != null ? order.product.name : '—'}">—</div>
+            <div class="rec-item-meta">Wholesale Bulk Order</div>
+          </td>
+          <td class="rec-td-num"
+              th:text="${order.quantity} + ' units'">—</td>
+          <td class="rec-td-num">
+            LKR <span th:text="${#numbers.formatDecimal(order.unitPrice, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+          </td>
+          <td class="rec-td-num rec-td-amount">
+            LKR <span th:text="${#numbers.formatDecimal(
+                            order.quantity * order.unitPrice.doubleValue(), 1, 'COMMA', 2, 'POINT')}">0.00</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="rec-receipt-divider"></div>
+
+      <!-- Totals -->
+      <div class="rec-totals">
+        <div class="rec-totals-inner">
+
+          <div class="rec-total-row">
+            <span class="rec-total-lbl">Subtotal</span>
+            <span class="rec-total-val">
+                        LKR <span th:text="${#numbers.formatDecimal(
+                            order.quantity * order.unitPrice.doubleValue(), 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </span>
+          </div>
+
+          <div class="rec-total-row rec-discount-row" th:if="${order.quantity > 100}">
+                    <span class="rec-total-lbl rec-discount-lbl">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        Bulk Discount (10% off for &gt;100 units)
+                    </span>
+            <span class="rec-total-val rec-discount-val">Applied</span>
+          </div>
+
+          <div class="rec-total-row rec-total-row--grand">
+            <span class="rec-grand-lbl">Total Paid</span>
+            <span class="rec-grand-val">
+                        LKR
+                        <span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="rec-receipt-divider rec-dash"></div>
+
+      <!-- Footer note -->
+      <div class="rec-footer-note">
+        <i class="bi bi-info-circle-fill"></i>
+        This is an official payment receipt for your wholesale purchase.
+        Please retain this for your records. For queries, contact our wholesale support team.
+      </div>
+
+      <!-- Thank you -->
+      <div class="rec-thankyou">
+        Thank you for your order, <span th:text="${user != null ? user.fullName : 'Valued Customer'}">Customer</span>!
+      </div>
+
+    </div><!-- /rec-receipt -->
+
+    <!-- ── ACTION BUTTONS ── -->
+    <div class="rec-actions">
+      <a th:href="@{'/wholesale/receipt/' + ${order.id} + '/download'}"
+         class="rec-btn rec-btn-download">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Download PDF
+      </a>
+      <button onclick="window.print()" class="rec-btn rec-btn-print">
+        <i class="bi bi-printer-fill"></i> Print Receipt
+      </button>
+      <a th:href="@{/wholesale}" class="rec-btn rec-btn-dashboard">
+        <i class="bi bi-speedometer2"></i> Back to Dashboard
+      </a>
+      <a th:href="@{/wholesale/products}" class="rec-btn rec-btn-shop">
+        <i class="bi bi-grid-fill"></i> Place Another Order
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════
+       STYLES
+  ════════════════════════════════════ -->
+  <style>
+    :root {
+      --gold:       #c8841f;
+      --gold-dark:  #9e6515;
+      --gold-bg:    #fdf7ee;
+      --gold-border:#f0e2c4;
+      --green:      #16a34a;
+      --green-bg:   #f0fdf4;
+      --blue:       #2563eb;
+      --red:        #dc2626;
+      --text:       #1a1208;
+      --text-muted: #6b5a42;
+      --text-faint: #9ca3af;
+      --border:     #e8dcc8;
+      --bg:         #faf8f5;
+      --white:      #ffffff;
+      --shadow:     0 2px 12px rgba(0,0,0,.07);
+      --radius:     14px;
+    }
+
+    .rec-root {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ── BREADCRUMB ── */
+    .rec-breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: .77rem; color: var(--text-faint);
+      margin-bottom: 22px;
+    }
+    .rec-breadcrumb-link {
+      color: var(--gold); text-decoration: none; font-weight: 500;
+    }
+
+    /* ── SUCCESS BANNER ── */
+    .rec-success-banner {
+      display: flex; align-items: center; gap: 20px;
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border: 1.5px solid rgba(22,163,74,.22);
+      border-radius: 14px; padding: 20px 24px;
+      margin-bottom: 26px;
+      animation: recSlide .4s cubic-bezier(.34,1.3,.64,1);
+    }
+    @keyframes recSlide {
+      from { transform: translateY(-12px); opacity: 0; }
+      to   { transform: none; opacity: 1; }
+    }
+
+    .rec-success-rings { position: relative; flex-shrink: 0; }
+    .rec-check-circle {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: #fff; font-size: 1.6rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 18px rgba(22,163,74,.35);
+    }
+
+    .rec-success-title {
+      font-size: 1.1rem; font-weight: 800; color: var(--green);
+      margin-bottom: 4px;
+    }
+    .rec-success-sub {
+      font-size: .83rem; color: #166534; line-height: 1.5;
+    }
+
+    /* ── RECEIPT CARD ── */
+    .rec-receipt {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .rec-receipt-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 28px 30px 22px;
+      background: linear-gradient(135deg, #fefcf8, #fff8ee);
+      border-bottom: 1px solid var(--gold-border);
+      gap: 16px; flex-wrap: wrap;
+    }
+
+    .rec-receipt-logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .rec-receipt-logo > i {
+      font-size: 2rem; color: var(--gold);
+    }
+    .rec-company-name {
+      font-size: 1.15rem; font-weight: 800; color: var(--text); letter-spacing: -.2px;
+    }
+    .rec-company-sub {
+      font-size: .72rem; color: var(--text-muted);
+      letter-spacing: .5px; text-transform: uppercase; margin-top: 2px;
+    }
+
+    .rec-receipt-meta { text-align: right; }
+    .rec-receipt-date { font-size: .83rem; font-weight: 600; color: var(--text); margin-top: 8px; }
+    .rec-receipt-time { font-size: .72rem; color: var(--text-faint); margin-top: 2px; }
+
+    /* PAID stamp */
+    .rec-paid-stamp {
+      display: inline-block;
+      border: 3px solid var(--green);
+      border-radius: 6px;
+      padding: 4px 14px;
+      transform: rotate(-2deg);
+    }
+    .rec-paid-inner {
+      font-size: 1.2rem; font-weight: 900;
+      color: var(--green); letter-spacing: 4px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Dividers */
+    .rec-receipt-divider {
+      height: 1px; background: var(--border);
+      margin: 0 30px;
+    }
+    .rec-receipt-divider.rec-dash {
+      background: none;
+      border-top: 2px dashed var(--border);
+    }
+
+    /* Details grid */
+    .rec-details-grid {
+      display: flex; gap: 20px; padding: 22px 30px;
+      flex-wrap: wrap;
+    }
+    .rec-details-col { flex: 1; min-width: 200px; }
+    .rec-details-col--right { text-align: right; }
+    .rec-details-label {
+      font-size: .66rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--text-faint);
+      margin-bottom: 8px;
+    }
+    .rec-details-name {
+      font-size: .94rem; font-weight: 700; color: var(--text);
+      margin-bottom: 3px;
+    }
+    .rec-details-val {
+      font-size: .8rem; color: var(--text-muted); margin-bottom: 2px;
+    }
+    .rec-details-badge {
+      display: inline-block; margin-top: 6px;
+      background: var(--gold-bg); color: var(--gold-dark);
+      border: 1px solid var(--gold-border);
+      font-size: .65rem; font-weight: 600; padding: 2px 9px;
+      border-radius: 20px; letter-spacing: .4px;
+    }
+
+    .rec-ref-row {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 10px; margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .rec-ref-lbl { font-size: .73rem; color: var(--text-faint); }
+    .rec-ref-val { font-size: .82rem; font-weight: 700; color: var(--text); }
+
+    .rec-status-pill, .rec-pay-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .7rem; font-weight: 600; padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .rec-status-pending  { background: #fef3c7; color: #92400e; }
+    .rec-status-approved { background: var(--green-bg); color: #166534; }
+    .rec-status-shipped  { background: #eff6ff; color: #1e40af; }
+    .rec-pay-paid { background: var(--green-bg); color: #166534; }
+
+    /* Items table */
+    .rec-items-table {
+      width: 100%; border-collapse: collapse;
+      font-size: .83rem;
+    }
+    .rec-items-table thead tr {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .rec-items-table th {
+      padding: 10px 16px;
+      font-size: .64rem; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    .rec-th-item { text-align: left; padding-left: 30px; }
+    .rec-th-num  { text-align: right; }
+    .rec-th-num:last-child { padding-right: 30px; }
+
+    .rec-item-row td { padding: 16px 16px; vertical-align: top; }
+    .rec-item-name { font-weight: 600; color: var(--text); }
+    .rec-item-meta { font-size: .73rem; color: var(--text-faint); margin-top: 3px; }
+    .rec-td-num {
+      text-align: right; color: var(--text-muted); font-size: .82rem;
+      vertical-align: middle;
+    }
+    .rec-td-num:first-child { padding-left: 30px; }
+    .rec-td-num:last-child  { padding-right: 30px; }
+    .rec-td-amount { font-weight: 600; color: var(--text); }
+
+    /* Totals */
+    .rec-totals { padding: 16px 30px; }
+    .rec-totals-inner { max-width: 320px; margin-left: auto; }
+    .rec-total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; font-size: .82rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .rec-total-row:last-child { border-bottom: none; }
+    .rec-total-lbl { color: var(--text-muted); }
+    .rec-total-val { font-weight: 600; color: var(--text); }
+    .rec-discount-lbl { color: var(--green); font-size: .77rem; }
+    .rec-discount-val { color: var(--green); font-weight: 600; }
+    .rec-total-row--grand {
+      margin-top: 4px; padding-top: 10px;
+      border-top: 2px solid var(--border);
+      border-bottom: none;
+    }
+    .rec-grand-lbl { font-size: .88rem; font-weight: 700; color: var(--text); }
+    .rec-grand-val {
+      font-size: 1.05rem; font-weight: 800;
+      color: var(--gold-dark);
+    }
+
+    /* Footer note */
+    .rec-footer-note {
+      padding: 14px 30px;
+      font-size: .76rem; color: var(--text-faint);
+      display: flex; align-items: flex-start; gap: 8px;
+      line-height: 1.55;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+    .rec-footer-note i { color: var(--blue); flex-shrink: 0; margin-top: 1px; }
+
+    .rec-thankyou {
+      text-align: center; padding: 16px 20px;
+      font-size: .9rem; font-weight: 600;
+      color: var(--gold-dark);
+      border-top: 1px solid var(--gold-border);
+      background: var(--gold-bg);
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .rec-actions {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      justify-content: center;
+    }
+    .rec-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 22px; border-radius: 10px;
+      font-family: inherit; font-size: .85rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: transform .15s, box-shadow .15s;
+      border: none;
+    }
+    .rec-btn:hover { transform: translateY(-1px); }
+    .rec-btn-download {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(22,163,74,.35);
+    }
+    .rec-btn-download:hover { color: #fff; }
+    .rec-btn-print {
+      background: #1a1208; color: #fff;
+      box-shadow: 0 3px 12px rgba(0,0,0,.2);
+    }
+    .rec-btn-print:hover { background: #2d1f10; color: #fff; }
+    .rec-btn-dashboard {
+      background: var(--white); color: var(--text);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .rec-btn-dashboard:hover { color: var(--text); }
+    .rec-btn-shop {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(200,132,31,.35);
+    }
+    .rec-btn-shop:hover { color: #fff; }
+
+    /* ── PRINT ── */
+    @media print {
+      body * { visibility: hidden; }
+      .rec-receipt, .rec-receipt * { visibility: visible; }
+      .rec-receipt {
+        position: fixed; inset: 0;
+        box-shadow: none; border: none;
+      }
+      .rec-root > *:not(.rec-receipt) { display: none; }
+    }
+  </style>
+
+</main>
+</html>
