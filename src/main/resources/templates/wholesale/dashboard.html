@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'My Wholesale Account')}">
+
+<main>
+    <div class="wd-root">
+
+        <!-- ══════════════════════════════════════════════════════
+             TOPBAR
+        ══════════════════════════════════════════════════════ -->
+        <div class="wd-topbar">
+            <div>
+                <h1 class="wd-page-title">
+                    <i class="bi bi-building-fill wd-title-icon"></i>
+                    Wholesale Dashboard
+                </h1>
+                <p class="wd-page-sub">
+                    Welcome back,
+                    <strong th:text="${user != null ? user.fullName : 'Wholesaler'}">User</strong>
+                    — manage your bulk orders here.
+                </p>
+            </div>
+            <div class="wd-topbar-actions">
+                <a th:href="@{/wholesale/products}"
+                   th:if="${approved}"
+                   class="wd-btn wd-btn-gold">
+                    <i class="bi bi-cart-plus-fill"></i>
+                    New Order
+                </a>
+            </div>
+        </div>
+
+        <!-- ── FLASH MESSAGES ── -->
+        <div th:if="${success}" class="wd-flash wd-flash-success">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${success}"></span>
+            <button class="wd-flash-close" onclick="this.closest('.wd-flash').remove()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div th:if="${error}" class="wd-flash wd-flash-error">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}"></span>
+            <button class="wd-flash-close" onclick="this.closest('.wd-flash').remove()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════
+             ACCOUNT STATUS GATE
+        ══════════════════════════════════════════════════════ -->
+
+        <!-- NOT YET REQUESTED -->
+        <div th:if="${!requested and !approved}" class="wd-status-gate wd-gate-neutral">
+            <div class="wd-gate-icon wd-gate-icon--amber">
+                <i class="bi bi-building-fill-gear"></i>
+            </div>
+            <div class="wd-gate-body">
+                <div class="wd-gate-title">Apply for Wholesale Access</div>
+                <div class="wd-gate-sub">
+                    Wholesale customers receive bulk pricing, special payment terms,
+                    and priority support. Applications are reviewed within 1–2 business days.
+                </div>
+                <form th:action="@{/wholesale/request-access}" method="post" style="display:inline;">
+                    <button type="submit" class="wd-btn wd-btn-gold" style="margin-top:14px;">
+                        <i class="bi bi-send-fill"></i> Request Wholesale Access
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PENDING APPROVAL -->
+        <div th:if="${requested and !approved}" class="wd-status-gate wd-gate-warning">
+            <div class="wd-gate-icon wd-gate-icon--amber">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div class="wd-gate-body">
+                <div class="wd-gate-title">Application Under Review</div>
+                <div class="wd-gate-sub">
+                    Your wholesale request has been submitted and is currently being reviewed by our team.
+                    You will gain access to wholesale pricing and ordering as soon as you are approved.
+                    Typical review time: <strong>1–2 business days</strong>.
+                </div>
+            </div>
+            <div class="wd-gate-badge-pending">
+                <i class="bi bi-clock-fill"></i> Pending
+            </div>
+        </div>
+
+        <!-- APPROVED — show full dashboard -->
+        <div th:if="${approved}">
+
+            <!-- ── KPI CARDS ── -->
+            <div class="wd-kpi-grid">
+
+                <div class="wd-kpi-card">
+                    <div class="wd-kpi-icon wd-kpi-icon--blue">
+                        <i class="bi bi-receipt-cutoff"></i>
+                    </div>
+                    <div class="wd-kpi-body">
+                        <div class="wd-kpi-label">Total Orders</div>
+                        <div class="wd-kpi-value" th:text="${orders.size()}">0</div>
+                    </div>
+                    <div class="wd-kpi-trend">All time</div>
+                </div>
+
+                <div class="wd-kpi-card">
+                    <div class="wd-kpi-icon wd-kpi-icon--amber">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div class="wd-kpi-body">
+                        <div class="wd-kpi-label">Pending</div>
+                        <div class="wd-kpi-value wd-val-amber" th:text="${pendingCount}">0</div>
+                    </div>
+                    <div class="wd-kpi-trend wd-trend-warn" th:if="${pendingCount > 0}">
+                        <i class="bi bi-exclamation-circle-fill"></i> Awaiting
+                    </div>
+                    <div class="wd-kpi-trend" th:if="${pendingCount == 0}">All clear</div>
+                </div>
+
+                <div class="wd-kpi-card">
+                    <div class="wd-kpi-icon wd-kpi-icon--green">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="wd-kpi-body">
+                        <div class="wd-kpi-label">Approved</div>
+                        <div class="wd-kpi-value wd-val-green" th:text="${approvedCount}">0</div>
+                    </div>
+                    <div class="wd-kpi-trend">Confirmed</div>
+                </div>
+
+                <div class="wd-kpi-card">
+                    <div class="wd-kpi-icon wd-kpi-icon--blue2">
+                        <i class="bi bi-truck-front-fill"></i>
+                    </div>
+                    <div class="wd-kpi-body">
+                        <div class="wd-kpi-label">Shipped</div>
+                        <div class="wd-kpi-value wd-val-blue" th:text="${shippedCount}">0</div>
+                    </div>
+                    <div class="wd-kpi-trend">Dispatched</div>
+                </div>
+
+                <div class="wd-kpi-card wd-kpi-card--revenue">
+                    <div class="wd-kpi-icon wd-kpi-icon--gold">
+                        <i class="bi bi-currency-exchange"></i>
+                    </div>
+                    <div class="wd-kpi-body">
+                        <div class="wd-kpi-label">Total Spend</div>
+                        <div class="wd-kpi-value wd-val-gold" style="font-size:1.1rem;">
+                            LKR <span th:text="${#numbers.formatDecimal(totalAmount, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                        </div>
+                    </div>
+                    <div class="wd-kpi-trend">Lifetime total</div>
+                </div>
+
+            </div>
+
+            <!-- ══════════════════════════════════════════════
+                 QUICK ORDER SHORTCUT PANEL
+            ══════════════════════════════════════════════ -->
+            <div class="wd-quick-order-panel" th:if="${!#lists.isEmpty(products)}">
+                <div class="wd-qo-head">
+                    <div class="wd-qo-title">
+                        <i class="bi bi-lightning-charge-fill wd-qo-icon"></i>
+                        Quick Order
+                    </div>
+                    <a th:href="@{/wholesale/products}" class="wd-btn wd-btn-outline wd-btn-sm">
+                        <i class="bi bi-grid-fill"></i> View All Products
+                    </a>
+                </div>
+                <div class="wd-qo-grid">
+                    <div class="wd-qo-item" th:each="p : ${products}">
+                        <div class="wd-qo-product-info">
+                            <div class="wd-qo-dot"></div>
+                            <div>
+                                <div class="wd-qo-name" th:text="${p.name}">Product</div>
+                                <div class="wd-qo-price">
+                                    LKR <span th:text="${#numbers.formatDecimal(p.price, 1, 'COMMA', 2, 'POINT')}">0</span>
+                                    / unit · min <span th:text="${p.minimumQuantity}">50</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a th:href="@{/wholesale/products}" class="wd-btn wd-btn-gold wd-btn-sm">
+                            <i class="bi bi-cart-plus-fill"></i> Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════
+                 ORDERS TABLE
+            ══════════════════════════════════════════════ -->
+            <div class="wd-panel">
+                <div class="wd-panel-header">
+                    <div class="wd-panel-title">
+                        <i class="bi bi-list-ul wd-panel-icon"></i>
+                        My Orders
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="wd-count-badge"
+                          th:text="${orders.size()} + ' orders'">0 orders</span>
+                        <a th:href="@{/wholesale/products}" class="wd-btn wd-btn-gold wd-btn-sm">
+                            <i class="bi bi-plus-lg"></i> New Order
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ORDERS TABLE -->
+                <div class="table-responsive" th:if="${!#lists.isEmpty(orders)}">
+                    <table class="wd-table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="o, iterStat : ${orders}"
+                            class="wd-table-row"
+                            th:classappend="${iterStat.index == 0 and orders.size() > 0} ? 'wd-row-newest' : ''">
+
+                            <td>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <!-- NEW badge on most recent order -->
+                                    <span class="wd-new-badge" th:if="${iterStat.index == 0}">NEW</span>
+                                    <span class="wd-order-num" th:text="'#' + ${o.id}"></span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="wd-product-cell">
+                                    <div class="wd-product-dot"></div>
+                                    <span th:text="${o.product != null ? o.product.name : '—'}"></span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="wd-qty-badge" th:text="${o.quantity} + ' units'"></span>
+                            </td>
+
+                            <td class="wd-price-cell">
+                                LKR <span th:text="${#numbers.formatDecimal(o.unitPrice, 1, 'COMMA', 2, 'POINT')}">0</span>
+                            </td>
+
+                            <td>
+                                <strong class="wd-total-bold">
+                                    LKR <span th:text="${#numbers.formatDecimal(o.totalAmount, 1, 'COMMA', 2, 'POINT')}">0</span>
+                                </strong>
+                            </td>
+
+                            <td>
+                            <span class="wd-status-pill wd-status-pending"
+                                  th:if="${o.status == 'PENDING'}">
+                                <i class="bi bi-clock-fill"></i> Pending
+                            </span>
+                                <span class="wd-status-pill wd-status-approved"
+                                      th:if="${o.status == 'APPROVED'}">
+                                <i class="bi bi-check-circle-fill"></i> Approved
+                            </span>
+                                <span class="wd-status-pill wd-status-shipped"
+                                      th:if="${o.status == 'SHIPPED'}">
+                                <i class="bi bi-truck-front-fill"></i> Shipped
+                            </span>
+                            </td>
+
+                            <td>
+                            <span class="wd-pay-pill wd-pay-paid"
+                                  th:if="${o.paymentStatus == 'PAID'}">
+                                <i class="bi bi-check-lg"></i> Paid
+                            </span>
+                                <span class="wd-pay-pill wd-pay-later"
+                                      th:if="${o.paymentStatus == 'PAY_LATER'}">
+                                <i class="bi bi-clock"></i> Pay Later
+                            </span>
+                            </td>
+
+                            <td class="wd-date-cell"
+                                th:text="${o.createdAt != null ?
+                                #temporals.format(o.createdAt, 'dd MMM yyyy') : '—'}">—</td>
+
+                            <td>
+                                <div class="wd-action-group">
+                                    <!-- Receipt (PAID orders) -->
+                                    <a th:if="${o.paymentStatus == 'PAID'}"
+                                       th:href="@{/wholesale/receipt/{id}(id=${o.id})}"
+                                       class="wd-icon-btn wd-icon-btn--purple"
+                                       title="View Receipt">
+                                        <i class="bi bi-receipt-cutoff"></i>
+                                    </a>
+
+                                    <!-- Pay Now (PAY_LATER pending orders) -->
+                                    <a th:if="${o.paymentStatus == 'PAY_LATER' and o.status == 'PENDING'}"
+                                       th:href="@{/wholesale/payment/{id}(id=${o.id})}"
+                                       class="wd-icon-btn wd-icon-btn--gold"
+                                       title="Pay Now">
+                                        <i class="bi bi-credit-card-fill"></i>
+                                    </a>
+
+                                    <!-- Edit (PENDING only) -->
+                                    <button th:if="${o.status == 'PENDING'}"
+                                            type="button"
+                                            class="wd-icon-btn wd-icon-btn--blue"
+                                            title="Edit Order"
+                                            th:onclick="'openEditModal(' + ${o.id} + ', ' + ${o.quantity} + ')'">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+
+                                    <!-- Delete (PENDING only) -->
+                                    <form th:if="${o.status == 'PENDING'}"
+                                          th:action="@{/wholesale/order/{id}/delete(id=${o.id})}"
+                                          method="post" style="display:inline;"
+                                          onsubmit="return confirm('Delete this order? This cannot be undone.')">
+                                        <button type="submit" class="wd-icon-btn wd-icon-btn--red" title="Delete">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div class="wd-empty" th:if="${#lists.isEmpty(orders)}">
+                    <div class="wd-empty-icon-wrap">
+                        <i class="bi bi-inbox-fill wd-empty-icon"></i>
+                    </div>
+                    <div class="wd-empty-title">No orders yet</div>
+                    <div class="wd-empty-sub">
+                        You haven't placed any wholesale orders yet.
+                        Browse our products and place your first bulk order.
+                    </div>
+                    <a th:href="@{/wholesale/products}" class="wd-btn wd-btn-gold">
+                        <i class="bi bi-grid-fill"></i> Browse Products
+                    </a>
+                </div>
+            </div>
+
+        </div><!-- /approved block -->
+
+    </div><!-- /wd-root -->
+
+    <!-- ══════════════════════════════════════════════
+         EDIT ORDER MODAL
+    ══════════════════════════════════════════════ -->
+    <div class="wd-modal-overlay" id="editModalOverlay">
+        <div class="wd-modal">
+            <div class="wd-modal-head">
+                <div class="wd-modal-head-left">
+                    <div class="wd-modal-icon">
+                        <i class="bi bi-pencil-fill"></i>
+                    </div>
+                    <div>
+                        <div class="wd-modal-title">Edit Order</div>
+                        <div class="wd-modal-sub">Only quantity can be updated on pending orders</div>
+                    </div>
+                </div>
+                <button class="wd-modal-close" onclick="closeEditModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="wd-modal-body">
+                <form id="editForm" method="post">
+                    <div class="wd-form-fg">
+                        <label class="wd-form-label">New Quantity (min. 50 units)</label>
+                        <div class="wd-qty-wrap">
+                            <button type="button" class="wd-qty-btn" onclick="adjustEditQty(-10)">
+                                <i class="bi bi-dash-lg"></i>
+                            </button>
+                            <input type="number" name="quantity" id="editQtyInput"
+                                   class="wd-qty-input" min="50" required>
+                            <button type="button" class="wd-qty-btn" onclick="adjustEditQty(10)">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                        <div class="wd-qty-min-note">
+                            <i class="bi bi-info-circle"></i>
+                            Minimum 50 units per order
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="wd-modal-foot">
+                <button class="wd-btn wd-btn-outline" onclick="closeEditModal()">Cancel</button>
+                <button class="wd-btn wd-btn-gold" onclick="submitEdit()">
+                    <i class="bi bi-check-lg"></i> Update Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         STYLES
+    ════════════════════════════════════ -->
+    <style>
+        :root {
+            --gold:       #c8841f;
+            --gold-dark:  #9e6515;
+            --gold-bg:    #fdf7ee;
+            --gold-border:#f0e2c4;
+            --green:      #16a34a;
+            --green-bg:   #f0fdf4;
+            --blue:       #2563eb;
+            --blue-bg:    #eff6ff;
+            --red:        #dc2626;
+            --red-bg:     #fef2f2;
+            --amber:      #d97706;
+            --amber-bg:   #fffbeb;
+            --purple:     #7c3aed;
+            --purple-bg:  #f5f3ff;
+            --text:       #1a1208;
+            --text-muted: #6b5a42;
+            --text-faint: #9ca3af;
+            --border:     #e8dcc8;
+            --bg:         #faf8f5;
+            --white:      #ffffff;
+            --shadow:     0 2px 12px rgba(0,0,0,.07);
+            --radius:     14px;
+        }
+
+        .wd-root {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 16px 60px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* TOPBAR */
+        .wd-topbar {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .wd-page-title {
+            font-size: 1.4rem; font-weight: 800; color: var(--text);
+            display: flex; align-items: center; gap: 10px; margin: 0 0 4px;
+        }
+        .wd-title-icon { color: var(--gold); }
+        .wd-page-sub   { font-size: .84rem; color: var(--text-muted); margin: 0; }
+
+        /* FLASH */
+        .wd-flash {
+            display: flex; align-items: center; gap: 10px;
+            padding: 13px 16px; border-radius: 10px;
+            font-size: .85rem; font-weight: 500; margin-bottom: 20px;
+            animation: wdFade .3s ease;
+        }
+        @keyframes wdFade { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+        .wd-flash-success { background:var(--green-bg); color:#166534; border:1px solid rgba(22,163,74,.2); }
+        .wd-flash-error   { background:var(--red-bg);   color:var(--red); border:1px solid rgba(220,38,38,.2); }
+        .wd-flash-close { margin-left:auto; background:none; border:none; color:inherit; opacity:.6; cursor:pointer; }
+
+        /* STATUS GATE */
+        .wd-status-gate {
+            display: flex; align-items: flex-start; gap: 18px;
+            padding: 24px; border-radius: var(--radius);
+            margin-bottom: 26px; flex-wrap: wrap;
+        }
+        .wd-gate-neutral { background:var(--white); border:1px solid var(--border); box-shadow:var(--shadow); }
+        .wd-gate-warning { background:var(--amber-bg); border:1px solid rgba(217,119,6,.22); }
+        .wd-gate-icon {
+            width: 52px; height: 52px; border-radius: 13px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; flex-shrink: 0;
+        }
+        .wd-gate-icon--amber { background:var(--gold-bg); color:var(--gold); }
+        .wd-gate-body { flex: 1; }
+        .wd-gate-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .wd-gate-sub   { font-size: .84rem; color: var(--text-muted); line-height: 1.6; }
+        .wd-gate-badge-pending {
+            align-self: center;
+            background: #fef3c7; color: #92400e;
+            border: 1px solid rgba(217,119,6,.25);
+            padding: 6px 14px; border-radius: 20px;
+            font-size: .77rem; font-weight: 700;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        /* KPI GRID */
+        .wd-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px; margin-bottom: 24px;
+        }
+        .wd-kpi-card {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+            box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .wd-kpi-card--revenue {
+            border-color: var(--gold-border);
+            background: linear-gradient(135deg, #fefcf8, #fffdf9);
+        }
+        .wd-kpi-icon {
+            width: 38px; height: 38px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .95rem;
+        }
+        .wd-kpi-icon--blue   { background:var(--blue-bg);   color:var(--blue);   }
+        .wd-kpi-icon--amber  { background:var(--amber-bg);  color:var(--amber);  }
+        .wd-kpi-icon--green  { background:var(--green-bg);  color:var(--green);  }
+        .wd-kpi-icon--blue2  { background:#eff6ff;           color:#1d4ed8;       }
+        .wd-kpi-icon--gold   { background:var(--gold-bg);   color:var(--gold);   }
+        .wd-kpi-label { font-size:.68rem; font-weight:600; letter-spacing:.7px; text-transform:uppercase; color:var(--text-faint); }
+        .wd-kpi-value { font-size:1.6rem; font-weight:800; color:var(--text); line-height:1; }
+        .wd-val-amber  { color:var(--amber); }
+        .wd-val-green  { color:var(--green); }
+        .wd-val-blue   { color:var(--blue);  }
+        .wd-val-gold   { color:var(--gold-dark); }
+        .wd-kpi-trend  { font-size:.69rem; color:var(--text-faint); }
+        .wd-trend-warn { color:var(--amber); font-weight:600; }
+
+        /* QUICK ORDER */
+        .wd-quick-order-panel {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+            box-shadow: var(--shadow); margin-bottom: 24px;
+        }
+        .wd-qo-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 18px; border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+        .wd-qo-title {
+            display: flex; align-items: center; gap: 7px;
+            font-size: .85rem; font-weight: 700; color: var(--text);
+        }
+        .wd-qo-icon { color: var(--gold); }
+        .wd-qo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        }
+        .wd-qo-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px; gap: 12px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .wd-qo-item:last-child { border-right: none; }
+        .wd-qo-product-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+        .wd-qo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+        .wd-qo-name  { font-size: .83rem; font-weight: 600; color: var(--text); }
+        .wd-qo-price { font-size: .72rem; color: var(--text-faint); margin-top: 2px; }
+
+        /* PANEL */
+        .wd-panel {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+            box-shadow: var(--shadow); margin-bottom: 24px;
+        }
+        .wd-panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px; border-bottom: 1px solid var(--border);
+            background: var(--bg); flex-wrap: wrap; gap: 10px;
+        }
+        .wd-panel-title {
+            display: flex; align-items: center; gap: 8px;
+            font-size: .86rem; font-weight: 700; color: var(--text);
+        }
+        .wd-panel-icon { color: var(--gold); }
+        .wd-count-badge {
+            background: var(--gold-bg); color: var(--gold-dark);
+            border: 1px solid var(--gold-border);
+            font-size: .68rem; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+        }
+
+        /* TABLE */
+        .wd-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+        .wd-table thead tr { border-bottom: 2px solid var(--border); }
+        .wd-table thead th {
+            padding: 10px 14px;
+            font-size: .63rem; font-weight: 700;
+            letter-spacing: 1.2px; text-transform: uppercase;
+            color: var(--text-faint); background: var(--bg);
+            white-space: nowrap;
+        }
+        .wd-table-row { border-bottom: 1px solid var(--border); transition: background .12s; }
+        .wd-table-row:last-child { border-bottom: none; }
+        .wd-table-row:hover { background: rgba(200,132,31,.025); }
+        .wd-table-row td { padding: 12px 14px; vertical-align: middle; }
+
+        /* NEW order highlight */
+        .wd-row-newest {
+            background: linear-gradient(90deg, rgba(200,132,31,.04), transparent) !important;
+            border-left: 3px solid var(--gold);
+        }
+        .wd-new-badge {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #fff; font-size: .58rem; font-weight: 800;
+            letter-spacing: .8px; padding: 2px 6px; border-radius: 4px;
+            animation: wdPulse 2s ease infinite;
+        }
+        @keyframes wdPulse {
+            0%,100%{ box-shadow: 0 0 0 0 rgba(200,132,31,.4); }
+            50%    { box-shadow: 0 0 0 5px rgba(200,132,31,0); }
+        }
+
+        .wd-order-num  { font-size: .82rem; font-weight: 600; color: var(--text-muted); }
+        .wd-product-cell { display: flex; align-items: center; gap: 7px; }
+        .wd-product-dot  { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+        .wd-qty-badge {
+            background: var(--gold-bg); color: var(--gold-dark);
+            border: 1px solid var(--gold-border);
+            font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+            white-space: nowrap;
+        }
+        .wd-price-cell { color: var(--text-muted); font-size: .8rem; }
+        .wd-total-bold { font-weight: 700; color: var(--text); }
+        .wd-date-cell  { color: var(--text-faint); font-size: .78rem; white-space: nowrap; }
+
+        /* STATUS & PAYMENT PILLS */
+        .wd-status-pill, .wd-pay-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: .7rem; font-weight: 600; padding: 3px 9px; border-radius: 20px;
+            white-space: nowrap;
+        }
+        .wd-status-pending  { background: #fef3c7; color: #92400e; }
+        .wd-status-approved { background: var(--green-bg); color: #166534; }
+        .wd-status-shipped  { background: var(--blue-bg);  color: #1e40af; }
+        .wd-pay-paid  { background: var(--green-bg); color: #166534; }
+        .wd-pay-later { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+        /* ACTION BUTTONS */
+        .wd-action-group { display: flex; gap: 5px; align-items: center; }
+        .wd-icon-btn {
+            width: 30px; height: 30px; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .78rem; border: none; cursor: pointer;
+            text-decoration: none; transition: transform .12s, box-shadow .12s;
+        }
+        .wd-icon-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,.15); }
+        .wd-icon-btn--blue   { background:var(--blue-bg);   color:var(--blue);   }
+        .wd-icon-btn--red    { background:var(--red-bg);     color:var(--red);    }
+        .wd-icon-btn--gold   { background:var(--gold-bg);    color:var(--gold);   }
+        .wd-icon-btn--purple { background:var(--purple-bg);  color:var(--purple); }
+
+        /* EMPTY */
+        .wd-empty {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 60px 20px; gap: 12px; text-align: center;
+        }
+        .wd-empty-icon-wrap {
+            width: 68px; height: 68px; border-radius: 50%;
+            background: var(--bg); border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .wd-empty-icon { font-size: 2rem; color: var(--text-faint); opacity: .4; }
+        .wd-empty-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .wd-empty-sub   { font-size: .82rem; color: var(--text-faint); max-width: 320px; line-height: 1.6; }
+
+        /* BUTTONS */
+        .wd-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 18px; border-radius: 9px;
+            font-family: inherit; font-size: .84rem; font-weight: 600;
+            cursor: pointer; text-decoration: none; border: none;
+            transition: transform .12s, box-shadow .12s;
+        }
+        .wd-btn:hover { transform: translateY(-1px); }
+        .wd-btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #fff; box-shadow: 0 3px 12px rgba(200,132,31,.3);
+        }
+        .wd-btn-gold:hover { color:#fff; }
+        .wd-btn-outline {
+            background: var(--white); color: var(--text);
+            border: 1.5px solid var(--border); box-shadow: var(--shadow);
+        }
+        .wd-btn-outline:hover { color: var(--text); }
+        .wd-btn-sm { padding: 7px 13px; font-size: .77rem; }
+
+        /* ── EDIT MODAL ── */
+        .wd-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1050; padding: 20px;
+        }
+        .wd-modal-overlay.open { display: flex; }
+        .wd-modal {
+            background: var(--white); border-radius: 18px;
+            width: 100%; max-width: 440px;
+            box-shadow: 0 24px 60px rgba(0,0,0,.2);
+            animation: wdModalPop .3s cubic-bezier(.34,1.3,.64,1);
+        }
+        @keyframes wdModalPop {
+            from { transform: scale(.9) translateY(16px); opacity:0; }
+            to   { transform: scale(1) translateY(0);     opacity:1; }
+        }
+        .wd-modal-head {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--border);
+            background: var(--bg); border-radius: 18px 18px 0 0;
+        }
+        .wd-modal-head-left { display: flex; align-items: center; gap: 12px; }
+        .wd-modal-icon {
+            width: 38px; height: 38px; border-radius: 9px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: .9rem; flex-shrink: 0;
+        }
+        .wd-modal-title { font-size: .92rem; font-weight: 700; color: var(--text); }
+        .wd-modal-sub   { font-size: .72rem; color: var(--text-faint); margin-top: 2px; }
+        .wd-modal-close {
+            width: 30px; height: 30px; border-radius: 7px;
+            background: transparent; border: none; cursor: pointer;
+            color: var(--text-faint); font-size: .8rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .12s;
+        }
+        .wd-modal-close:hover { background: var(--border); color: var(--text); }
+
+        .wd-modal-body { padding: 20px; }
+        .wd-modal-foot {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 14px 20px; border-top: 1px solid var(--border);
+        }
+
+        .wd-form-fg { display: flex; flex-direction: column; gap: 7px; }
+        .wd-form-label {
+            font-size: .69rem; font-weight: 700; letter-spacing: .8px;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .wd-qty-wrap {
+            display: flex; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden;
+        }
+        .wd-qty-wrap:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,132,31,.12); }
+        .wd-qty-btn {
+            width: 44px; min-width: 44px; border: none;
+            background: var(--bg); color: var(--text-muted);
+            font-size: .9rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .12s;
+        }
+        .wd-qty-btn:hover { background: var(--gold-bg); color: var(--gold); }
+        .wd-qty-input {
+            flex: 1; border: none; outline: none;
+            text-align: center; font-family: inherit;
+            font-size: 1rem; font-weight: 700; color: var(--text);
+            background: transparent; padding: 10px 4px;
+            border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+            -moz-appearance: textfield;
+        }
+        .wd-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .wd-qty-min-note {
+            font-size: .73rem; color: var(--text-faint);
+            display: flex; align-items: center; gap: 5px;
+        }
+    </style>
+
+    <!-- ════════════════════════════════════
+         SCRIPTS
+    ════════════════════════════════════ -->
+    <script>
+        let currentEditOrderId = null;
+
+        function openEditModal(orderId, currentQty) {
+            currentEditOrderId = orderId;
+            document.getElementById('editQtyInput').value = currentQty;
+            document.getElementById('editForm').action = '/wholesale/order/' + orderId + '/edit';
+            document.getElementById('editModalOverlay').classList.add('open');
+        }
+        function closeEditModal() {
+            document.getElementById('editModalOverlay').classList.remove('open');
+        }
+        document.getElementById('editModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+        function adjustEditQty(delta) {
+            const input = document.getElementById('editQtyInput');
+            const val   = parseInt(input.value) || 50;
+            input.value = Math.max(50, val + delta);
+        }
+        function submitEdit() {
+            const qty = parseInt(document.getElementById('editQtyInput').value) || 0;
+            if (qty < 50) {
+                alert('Minimum 50 units required for wholesale orders.');
+                return;
+            }
+            document.getElementById('editForm').submit();
+        }
+    </script>
+
+</main>
+</html>

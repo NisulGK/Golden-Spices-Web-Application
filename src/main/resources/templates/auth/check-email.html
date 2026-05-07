@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Check Your Email — GOLDEN')}">
+<main>
+  <style>
+    :root{--g:#c8841f;--gd:#8a5c0c;--gl:#e8a94a;--gp:#fdf4e3;--dk:#1a1208;--mu:#7a6444;--wh:#fff;--of:#faf7f2;--br:#e8dfc9;}
+    .ce-page{min-height:calc(100vh - 200px);display:flex;align-items:center;justify-content:center;padding:60px 20px;font-family:'Jost',sans-serif;background:var(--of);}
+    .ce-card{background:var(--wh);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.11);width:100%;max-width:480px;overflow:hidden;}
+    .ce-top{background:linear-gradient(135deg,var(--gd),var(--g),var(--gl));padding:38px 40px 32px;text-align:center;}
+    .ce-icon{width:72px;height:72px;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:2rem;color:#fff;}
+    .ce-title{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:6px;}
+    .ce-sub{font-size:.86rem;color:rgba(255,255,255,.75);}
+    .ce-body{padding:32px 40px 36px;text-align:center;}
+    .ce-email{display:inline-block;background:var(--gp);border:1px solid var(--br);border-radius:8px;padding:8px 18px;font-size:.9rem;font-weight:600;color:var(--gd);margin:12px 0 20px;}
+    .ce-text{font-size:.88rem;color:var(--mu);line-height:1.75;margin-bottom:24px;}
+    .ce-steps{background:var(--of);border:1px solid var(--br);border-radius:12px;padding:18px 20px;margin-bottom:24px;text-align:left;}
+    .ce-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+    .ce-step:last-child{margin-bottom:0;}
+    .ce-step-n{width:24px;height:24px;background:linear-gradient(135deg,var(--gd),var(--g));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px;}
+    .ce-step-t{font-size:.83rem;color:var(--mu);line-height:1.6;}
+    .ce-step-t strong{color:var(--dk);}
+    .btn-g{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;border-radius:9px;font-size:.88rem;font-weight:700;font-family:'Jost',sans-serif;text-decoration:none;transition:.22s;box-shadow:0 4px 14px rgba(200,132,31,.28);}
+    .btn-g:hover{background:linear-gradient(135deg,var(--g),var(--gl));color:#fff;transform:translateY(-1px);}
+    .ce-resend{margin-top:16px;font-size:.82rem;color:var(--mu);}
+    .ce-resend a{color:var(--g);font-weight:600;text-decoration:none;}
+    .ce-resend a:hover{text-decoration:underline;}
+    @media(max-width:480px){.ce-body,.ce-top{padding-left:24px;padding-right:24px;}}
+  </style>
+
+  <div class="ce-page">
+    <div class="ce-card">
+      <div class="ce-top">
+        <div class="ce-icon"><i class="bi bi-envelope-check"></i></div>
+        <div class="ce-title">Check Your Email</div>
+        <div class="ce-sub">We've sent you a verification link</div>
+      </div>
+      <div class="ce-body">
+
+        <div th:if="${registeredEmail}" class="ce-email"
+             th:text="${registeredEmail}">email@example.com</div>
+
+        <p class="ce-text">
+          A verification email has been sent to your inbox.
+          Click the link in the email to activate your account.
+        </p>
+
+        <div class="ce-steps">
+          <div class="ce-step">
+            <div class="ce-step-n">1</div>
+            <div class="ce-step-t"><strong>Open your email inbox</strong> and look for an email from GOLDEN.</div>
+          </div>
+          <div class="ce-step">
+            <div class="ce-step-n">2</div>
+            <div class="ce-step-t"><strong>Click "Verify My Email"</strong> inside the email.</div>
+          </div>
+          <div class="ce-step">
+            <div class="ce-step-n">3</div>
+            <div class="ce-step-t"><strong>Log in</strong> to your newly activated account.</div>
+          </div>
+        </div>
+
+        <a th:href="@{/auth/login}" class="btn-g">
+          <i class="bi bi-box-arrow-in-right"></i> Go to Login
+        </a>
+
+        <div class="ce-resend">
+          Didn't receive the email?
+          <a th:href="@{/auth/resend}">Resend verification email</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</html>

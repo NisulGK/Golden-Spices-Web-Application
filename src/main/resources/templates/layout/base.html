@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(content, title)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'GOLDEN | Dissanayaka Distributors'">GOLDEN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --g:#c8841f; --gd:#8a5c0c; --gl:#e8a94a; --gp:#f5c97a; --gpp:#fdf4e3;
+            --dk:#1a1208; --dk2:#120d06; --bd:#3d3020; --mu:#7a6444;
+            --wh:#ffffff; --of:#faf8f5; --br:#e8dfd0; --br2:#f0e8d8;
+            --shsm:0 2px 14px rgba(0,0,0,.07); --shmd:0 6px 30px rgba(0,0,0,.11);
+            --ease:cubic-bezier(.19,1,.22,1);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{background:var(--wh);color:var(--bd);font-family:'Jost',sans-serif;font-weight:400;line-height:1.7;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+        main{flex:1;}
+
+        /* TOPBAR */
+        .topbar{background:var(--dk2);color:rgba(255,255,255,.52);font-size:.67rem;letter-spacing:1.8px;text-transform:uppercase;padding:10px 0;position:relative;overflow:hidden;border-bottom:1px solid rgba(200,132,31,.12);}
+        .topbar::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--gl),transparent);animation:shimmer 4s ease-in-out infinite;}
+        @keyframes shimmer{0%{left:-60%}100%{left:120%}}
+        .topbar-in{max-width:1280px;margin:0 auto;padding:0 36px;display:flex;align-items:center;justify-content:space-between;}
+        .topbar-left{display:flex;gap:28px;align-items:center;}
+        .topbar-right{display:flex;gap:12px;align-items:center;}
+        .tb-item{display:flex;align-items:center;gap:7px;}
+        .tb-item i{color:var(--gl);font-size:.72rem;}
+        .tb-social{width:26px;height:26px;border:1px solid rgba(200,132,31,.22);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.32);font-size:.65rem;text-decoration:none;transition:all .3s;}
+        .tb-social:hover{border-color:var(--gl);color:var(--gl);background:rgba(200,132,31,.10);transform:translateY(-1px);}
+
+        /* NAVBAR */
+        .sitenav{background:rgba(255,255,255,.98);border-bottom:1px solid var(--br);position:sticky;top:0;z-index:1000;transition:all .4s var(--ease);box-shadow:0 1px 0 var(--br);}
+        .sitenav.up{background:rgba(255,255,255,.97);border-bottom-color:rgba(200,132,31,.18);box-shadow:0 4px 32px rgba(26,18,8,.10),0 1px 0 rgba(200,132,31,.12);}
+        .sitenav::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gd) 0%,var(--g) 40%,var(--gl) 70%,var(--gp) 100%);opacity:0;transition:opacity .4s;}
+        .sitenav.up::before{opacity:1;}
+        .nav-in{max-width:1280px;margin:0 auto;padding:0 36px;height:76px;display:flex;align-items:center;justify-content:space-between;gap:28px;}
+
+        /* Logo */
+        .nav-logo{display:flex;align-items:center;gap:13px;text-decoration:none;flex-shrink:0;transition:opacity .2s;}
+        .nav-logo:hover{opacity:.9;}
+        .logo-gem{position:relative;width:46px;height:46px;border-radius:12px;background:linear-gradient(145deg,var(--gd) 0%,var(--g) 55%,var(--gl) 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.15rem;flex-shrink:0;box-shadow:0 4px 18px rgba(200,132,31,.38),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.10);}
+        .logo-gem::after{content:'';position:absolute;top:4px;left:6px;width:16px;height:8px;background:rgba(255,255,255,.28);border-radius:50%;transform:rotate(-15deg);pointer-events:none;}
+        .logo-text{display:flex;flex-direction:column;line-height:1.15;}
+        .logo-name{font-family:'Cinzel',serif;font-size:1.08rem;font-weight:700;color:var(--dk);letter-spacing:4px;}
+        .logo-sub{font-size:.5rem;letter-spacing:2.8px;text-transform:uppercase;background:linear-gradient(90deg,var(--gd),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600;}
+
+        /* Nav links */
+        .nav-links{display:flex;align-items:center;gap:2px;list-style:none;flex:1;justify-content:center;}
+        .nav-links a{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:500;letter-spacing:.3px;color:var(--mu);text-decoration:none;position:relative;transition:all .22s;}
+        .nav-links a i{font-size:.85rem;transition:transform .2s;}
+        .nav-links a:hover i{transform:translateY(-1px);}
+        .nav-links a::after{content:'';position:absolute;bottom:4px;left:16px;right:16px;height:2px;background:linear-gradient(90deg,var(--gd),var(--gl));border-radius:2px;transform:scaleX(0);transform-origin:center;transition:transform .3s var(--ease);}
+        .nav-links a:hover{color:var(--dk);background:rgba(200,132,31,.06);}
+        .nav-links a:hover::after{transform:scaleX(1);}
+        .nav-links a.active{color:var(--g);font-weight:600;background:rgba(200,132,31,.08);}
+        .nav-links a.active::after{transform:scaleX(1);}
+
+        /* Actions */
+        .nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+        .nav-phone{display:flex;align-items:center;gap:7px;padding:7px 16px;background:var(--of);border:1px solid var(--br);border-radius:50px;font-size:.72rem;color:var(--mu);font-weight:500;white-space:nowrap;transition:all .2s;}
+        .nav-phone i{color:var(--g);font-size:.78rem;}
+        .nav-ic{position:relative;width:44px;height:44px;border-radius:11px;border:1px solid var(--br);background:var(--wh);display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:1.05rem;text-decoration:none;cursor:pointer;transition:all .22s;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+        .nav-ic:hover{background:var(--of);color:var(--g);border-color:rgba(200,132,31,.28);transform:translateY(-1px);box-shadow:0 4px 16px rgba(200,132,31,.14);}
+        .cart-dot{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;background:linear-gradient(135deg,#d63031,#e17055);color:#fff;font-size:.58rem;font-weight:700;border-radius:50px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;box-shadow:0 2px 6px rgba(214,48,49,.35);}
+        .nav-sep{width:1px;height:26px;background:var(--br);}
+        .btn-nav-login{display:inline-flex;align-items:center;gap:7px;padding:9px 22px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:600;letter-spacing:.3px;text-decoration:none;font-family:'Jost',sans-serif;cursor:pointer;transition:all .25s;box-shadow:0 4px 16px rgba(200,132,31,.32),inset 0 1px 0 rgba(255,255,255,.15);}
+        .btn-nav-login:hover{background:linear-gradient(135deg,var(--g),var(--gl));color:#fff;transform:translateY(-1px);box-shadow:0 6px 22px rgba(200,132,31,.44);}
+        .btn-nav-logout{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;background:transparent;border:1.5px solid rgba(163,21,21,.22);color:#a31515;border-radius:8px;font-size:.8rem;font-weight:500;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;}
+        .btn-nav-logout:hover{background:rgba(163,21,21,.05);border-color:rgba(163,21,21,.45);}
+        /* ── Profile dropdown ── */
+        .npd-wrap{position:relative;}
+        .npd-btn{display:inline-flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;background:var(--wh);border:1.5px solid var(--br);border-radius:50px;cursor:pointer;transition:all .22s;font-family:'Jost',sans-serif;user-select:none;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+        .npd-btn:hover{border-color:rgba(200,132,31,.45);box-shadow:0 3px 14px rgba(200,132,31,.18);background:var(--of);}
+        .npd-btn.open{border-color:var(--g);box-shadow:0 3px 14px rgba(200,132,31,.22);}
+        .npd-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gd),var(--g));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;font-family:'Cinzel',serif;overflow:hidden;flex-shrink:0;border:2px solid rgba(200,132,31,.25);}
+        .npd-av img{width:100%;height:100%;object-fit:cover;display:block;}
+        .npd-uname{font-size:.82rem;font-weight:600;color:var(--dk);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .npd-caret{font-size:.65rem;color:var(--mu);transition:transform .25s;flex-shrink:0;}
+        .npd-btn.open .npd-caret{transform:rotate(180deg);}
+
+        .npd-panel{position:absolute;top:calc(100% + 12px);right:0;width:280px;background:#18181f;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06);overflow:hidden;z-index:1500;opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
+        .npd-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+        .npd-panel::before{content:'';position:absolute;top:-6px;right:24px;width:13px;height:13px;background:#18181f;transform:rotate(45deg);border-radius:2px 0 0 0;}
+
+        .npd-head{padding:20px 18px 16px;background:linear-gradient(160deg,#24203a,#1a1825);border-bottom:1px solid rgba(255,255,255,.06);text-align:center;}
+        .npd-head::after{content:'';display:block;margin:0 20%;margin-top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,132,31,.4),transparent);}
+        .npd-big-av{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--gd),var(--g),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:700;color:#fff;font-family:'Cinzel',serif;margin:0 auto 11px;overflow:hidden;border:3px solid rgba(200,132,31,.5);box-shadow:0 0 0 4px rgba(200,132,31,.1),0 8px 24px rgba(0,0,0,.3);position:relative;cursor:pointer;}
+        .npd-big-av img{width:100%;height:100%;object-fit:cover;display:block;}
+        .npd-av-overlay{position:absolute;inset:0;background:rgba(0,0,0,.52);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:.2s;font-size:.65rem;color:#fff;font-family:'Jost',sans-serif;font-weight:600;text-decoration:none;gap:2px;}
+        .npd-av-overlay i{font-size:.85rem;}
+        .npd-big-av:hover .npd-av-overlay{opacity:1;}
+        .npd-name{font-family:'Cinzel',serif;font-size:.95rem;font-weight:700;color:#fff;letter-spacing:.4px;margin-bottom:3px;}
+        .npd-email{font-size:.73rem;color:rgba(255,255,255,.4);margin-bottom:10px;}
+        .npd-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;background:rgba(200,132,31,.15);border:1px solid rgba(200,132,31,.3);border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.8px;color:#e8a94a;text-transform:uppercase;}
+
+        .npd-group{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+        .npd-group:last-child{border-bottom:none;}
+        .npd-item{display:flex;align-items:center;gap:12px;padding:9px 16px;font-size:.82rem;color:rgba(255,255,255,.58);text-decoration:none;transition:all .15s;font-family:'Jost',sans-serif;font-weight:500;background:none;border:none;width:100%;text-align:left;cursor:pointer;}
+        .npd-item:hover{background:rgba(255,255,255,.055);color:#fff;padding-left:20px;}
+        .npd-item i{width:17px;text-align:center;font-size:.88rem;color:rgba(200,132,31,.6);flex-shrink:0;transition:color .15s;}
+        .npd-item:hover i{color:#e8a94a;}
+        .npd-item-badge{margin-left:auto;font-size:.6rem;padding:2px 7px;border-radius:20px;font-weight:700;background:rgba(200,132,31,.18);color:#e8a94a;border:1px solid rgba(200,132,31,.28);}
+        .npd-item.out{color:rgba(231,76,60,.7);}
+        .npd-item.out i{color:rgba(231,76,60,.5);}
+        .npd-item.out:hover{background:rgba(231,76,60,.07);color:#e74c3c;}
+        .npd-item.out:hover i{color:#e74c3c;}
+        .npd-back{display:none;position:fixed;inset:0;z-index:1499;}
+
+        .nav-burger{display:none;width:44px;height:44px;border-radius:11px;border:1.5px solid var(--br);background:var(--wh);align-items:center;justify-content:center;font-size:1.15rem;color:var(--mu);cursor:pointer;transition:all .2s;}
+        .nav-burger:hover{background:var(--of);border-color:rgba(200,132,31,.25);}
+
+        /* DRAWER */
+        .mdrawer{display:none;position:fixed;inset:0;z-index:2000;}
+        .mdrawer.open{display:block;}
+        .mdrawer-bd{position:absolute;inset:0;background:rgba(18,10,4,.55);backdrop-filter:blur(5px);}
+        .mdrawer-panel{position:absolute;top:0;right:0;bottom:0;width:292px;background:var(--wh);box-shadow:-10px 0 50px rgba(18,10,4,.18);display:flex;flex-direction:column;animation:drIn .34s var(--ease) forwards;}
+        @keyframes drIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+        .mdrawer-head{padding:22px 20px 18px;border-bottom:1px solid var(--br2);background:var(--of);display:flex;align-items:center;justify-content:space-between;}
+        .mdr-brand{display:flex;align-items:center;gap:10px;}
+        .mdr-gem{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--gd),var(--g));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;box-shadow:0 3px 10px rgba(200,132,31,.30);}
+        .mdr-name{font-family:'Cinzel',serif;font-size:.95rem;font-weight:700;letter-spacing:3px;color:var(--dk);}
+        .mdr-name span{color:var(--g);}
+        .mdr-close{width:32px;height:32px;border:1px solid var(--br);border-radius:8px;background:var(--wh);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:.9rem;transition:.2s;}
+        .mdr-close:hover{background:var(--br2);color:var(--dk);}
+        .mdr-nav{flex:1;padding:14px 12px;overflow-y:auto;list-style:none;}
+        .mdr-nav li a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:var(--mu);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .2s;}
+        .mdr-nav li a i{color:var(--g);font-size:1rem;width:20px;text-align:center;}
+        .mdr-nav li a:hover{background:rgba(200,132,31,.07);color:var(--dk);}
+        .mdr-div{height:1px;background:var(--br2);margin:8px 0;}
+        .mdr-footer{padding:14px;border-top:1px solid var(--br2);background:var(--of);display:flex;flex-direction:column;gap:8px;}
+
+        /* FLASH */
+        .flashzone{max-width:1280px;margin:0 auto;padding:16px 36px 0;}
+        .flash-msg{display:flex;align-items:center;gap:12px;padding:13px 18px;border-radius:10px;font-size:.88rem;font-weight:500;border:1px solid transparent;margin-bottom:10px;animation:fIn .35s ease;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+        @keyframes fIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .flash-ok{background:#edfaf3;border-color:#a8e6c5;color:#1a7a46;}
+        .flash-ok i{color:#27ae60;font-size:1.1rem;}
+        .flash-err{background:#fff4f4;border-color:#f5b8b8;color:#a31515;}
+        .flash-err i{color:#e74c3c;font-size:1.1rem;}
+        .flash-x{margin-left:auto;background:none;border:none;cursor:pointer;color:inherit;opacity:.45;font-size:.9rem;padding:0;line-height:1;transition:opacity .2s;}
+        .flash-x:hover{opacity:1;}
+
+        /* PAGE WRAP */
+        .page-wrap{max-width:1280px;margin:0 auto;padding:40px 36px 64px;width:100%;}
+
+        /* FOOTER */
+        .sitefooter{background:var(--dk);color:rgba(255,255,255,.55);font-size:.87rem;margin-top:auto;position:relative;overflow:hidden;}
+        .sitefooter::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent 0%,var(--gd) 15%,var(--g) 40%,var(--gl) 60%,var(--gp) 75%,var(--g) 88%,transparent 100%);}
+        .sitefooter::after{content:'';position:absolute;right:-120px;bottom:-120px;width:420px;height:420px;border-radius:50%;border:1px solid rgba(200,132,31,.06);pointer-events:none;}
+        .footer-c2{position:absolute;right:-60px;bottom:-60px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(200,132,31,.08);pointer-events:none;}
+        .footer-c3{position:absolute;left:-80px;top:40px;width:280px;height:280px;border-radius:50%;border:1px solid rgba(200,132,31,.05);pointer-events:none;}
+        .footer-top{max-width:1280px;margin:0 auto;padding:52px 36px 40px;display:grid;grid-template-columns:1.55fr 1fr 1fr 1.1fr;gap:44px;position:relative;z-index:1;}
+        .footer-logo-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+        .footer-gem{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gd),var(--g),var(--gl));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;box-shadow:0 4px 16px rgba(200,132,31,.30);}
+        .footer-logo-name{font-family:'Cinzel',serif;font-size:1.05rem;font-weight:700;letter-spacing:4px;color:rgba(255,255,255,.92);}
+        .footer-logo-sub{font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--g);font-weight:500;margin-top:1px;}
+        .footer-tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.93rem;color:rgba(255,255,255,.35);line-height:1.75;margin-bottom:18px;}
+        .footer-rule{width:32px;height:2px;background:linear-gradient(90deg,var(--gd),var(--gl));border-radius:2px;margin-bottom:18px;}
+        .fcon{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:.81rem;color:rgba(255,255,255,.42);line-height:1.5;}
+        .fcon i{color:var(--gl);font-size:.82rem;flex-shrink:0;margin-top:2px;}
+        .footer-socials{display:flex;gap:8px;margin-top:20px;}
+        .footer-soc{width:34px;height:34px;border:1px solid rgba(200,132,31,.22);border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-size:.88rem;text-decoration:none;transition:all .28s;}
+        .footer-soc:hover{background:rgba(200,132,31,.15);border-color:rgba(200,132,31,.45);color:var(--gl);transform:translateY(-2px);box-shadow:0 4px 14px rgba(200,132,31,.20);}
+        .fcol-title{font-family:'Cinzel',serif;font-size:.67rem;letter-spacing:3.5px;text-transform:uppercase;color:var(--gl);margin-bottom:18px;padding-bottom:12px;position:relative;}
+        .fcol-title::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:1.5px;background:linear-gradient(90deg,var(--g),transparent);border-radius:2px;}
+        .flinks{list-style:none;display:flex;flex-direction:column;gap:8px;}
+        .flinks a{color:rgba(255,255,255,.42);text-decoration:none;font-size:.84rem;display:flex;align-items:center;gap:9px;transition:all .25s;padding:1px 0;}
+        .flinks a i{font-size:.65rem;color:var(--g);opacity:.6;flex-shrink:0;}
+        .flinks a:hover{color:var(--gp);padding-left:5px;}
+        .flinks a:hover i{opacity:1;}
+        .footer-map{border-radius:10px;overflow:hidden;border:1px solid rgba(200,132,31,.12);margin-top:8px;opacity:.82;transition:opacity .3s;}
+        .footer-map:hover{opacity:1;}
+        .footer-map iframe{display:block;height:148px;}
+        .footer-nl{margin-top:18px;display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid rgba(200,132,31,.18);}
+        .footer-nl input{flex:1;padding:10px 14px;background:rgba(255,255,255,.05);border:none;outline:none;color:rgba(255,255,255,.75);font-size:.8rem;font-family:'Jost',sans-serif;}
+        .footer-nl input::placeholder{color:rgba(255,255,255,.28);}
+        .footer-nl button{padding:10px 16px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;cursor:pointer;font-size:.75rem;font-weight:600;font-family:'Jost',sans-serif;transition:.2s;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
+        .footer-nl button:hover{background:linear-gradient(135deg,var(--g),var(--gl));}
+        .footer-bottom{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.06);max-width:1280px;margin:0 auto;padding:16px 36px;display:flex;align-items:center;justify-content:space-between;font-size:.71rem;color:rgba(255,255,255,.24);letter-spacing:.3px;}
+        .footer-bottom-brand{font-family:'Cinzel',serif;color:var(--gl);letter-spacing:2px;}
+
+        /* BOOTSTRAP OVERRIDES */
+        .card{border:1px solid var(--br)!important;box-shadow:var(--shsm)!important;border-radius:12px!important;}
+        .form-control,.form-select{border-color:var(--br)!important;border-radius:8px!important;font-family:'Jost',sans-serif!important;}
+        .form-control:focus,.form-select:focus{border-color:var(--g)!important;box-shadow:0 0 0 3px rgba(200,132,31,.15)!important;}
+        .btn-primary{background:linear-gradient(135deg,var(--gd),var(--g))!important;border-color:var(--g)!important;font-family:'Jost',sans-serif!important;font-weight:600!important;box-shadow:0 4px 14px rgba(200,132,31,.28)!important;}
+        .btn-primary:hover{background:linear-gradient(135deg,var(--g),var(--gl))!important;border-color:var(--gl)!important;}
+        .table thead th{background:#f5f0e8!important;color:var(--mu)!important;font-size:.75rem!important;letter-spacing:.8px!important;text-transform:uppercase!important;font-weight:600!important;border-bottom:2px solid var(--br)!important;}
+
+        /* RESPONSIVE */
+        @media(max-width:1100px){.footer-top{grid-template-columns:1fr 1fr;gap:32px;}.nav-phone{display:none!important;}}
+        @media(max-width:768px){.topbar{display:none;}.nav-links{display:none;}.nav-burger{display:flex;}.nav-in{padding:0 20px;}.flashzone{padding:12px 20px 0;}.page-wrap{padding:24px 20px 48px;}.footer-top{grid-template-columns:1fr;padding:36px 20px 28px;}.footer-bottom{flex-direction:column;gap:8px;text-align:center;padding:14px 20px;}}
+        @media(max-width:480px){.logo-sub{display:none;}.nav-sep{display:none;}}
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-in">
+        <div class="topbar-left">
+            <span class="tb-item"><i class="bi bi-geo-alt-fill"></i>96B/2, Old Kesbewa Road, Nugegoda</span>
+            <span class="tb-item d-none d-md-flex"><i class="bi bi-truck"></i>Island-wide delivery available</span>
+        </div>
+        <div class="topbar-right">
+            <a href="tel:+94718579984" class="tb-item" style="text-decoration:none;color:inherit;"><i class="bi bi-telephone-fill"></i>071 857 9984</a>
+            <a href="https://www.facebook.com/share/18LDgHNuQf/?mibextid=wwXIfr" target="_blank" rel="noopener" class="tb-social" title="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/goldenp6308?utm_source=qr&igsh=NzJtYTcxOWI1emZx" target="_blank" rel="noopener" class="tb-social" title="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="https://wa.me/94777808259" target="_blank" rel="noopener" class="tb-social" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+        </div>
+    </div>
+</div>
+
+<header class="sitenav" id="siteNav">
+    <div class="nav-in">
+        <a th:href="@{/}" class="nav-logo">
+            <div class="logo-gem"><i class="bi bi-gem"></i></div>
+            <div class="logo-text">
+                <span class="logo-name">GOLDEN</span>
+                <span class="logo-sub">Dissanayaka Distributors</span>
+            </div>
+        </a>
+        <ul class="nav-links">
+            <li><a th:href="@{/}"><i class="bi bi-house"></i>Home</a></li>
+            <li><a th:href="@{/products}"><i class="bi bi-grid-3x3-gap"></i>Products</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/wholesale}"><i class="bi bi-box-seam"></i>Wholesale</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/orders}"><i class="bi bi-bag-check"></i>My Orders</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a href="https://wa.me/94777808259" target="_blank" rel="noopener" class="nav-phone d-none d-xl-flex" style="text-decoration:none;" title="Chat on WhatsApp"><i class="bi bi-telephone-fill"></i>077 780 8259</a>
+            <div class="nav-sep d-none d-lg-block"></div>
+            <a th:href="@{/cart}" class="nav-ic" title="Shopping Cart"><i class="bi bi-bag"></i></a>
+
+            <!-- Not logged in -->
+            <a th:href="@{/auth/login}" sec:authorize="!isAuthenticated()" class="btn-nav-login">
+                <i class="bi bi-box-arrow-in-right"></i>Login
+            </a>
+
+            <!-- Logged in: profile dropdown -->
+            <div sec:authorize="isAuthenticated()" class="npd-wrap">
+                <div class="npd-btn" id="npdBtn" onclick="npdToggle()">
+                    <div class="npd-av">
+                        <img th:src="@{'/profile/picture/' + ${#authentication.principal.id}}"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" alt="">
+                        <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;"
+                              th:text="${#strings.substring(#authentication.principal.fullName,0,1).toUpperCase()}">U</span>
+                    </div>
+                    <span class="npd-uname" th:text="${#authentication.principal.fullName}">Name</span>
+                    <i class="bi bi-chevron-down npd-caret"></i>
+                </div>
+
+                <div class="npd-panel" id="npdPanel">
+                    <div class="npd-head">
+                        <div class="npd-big-av">
+                            <img th:src="@{'/profile/picture/' + ${#authentication.principal.id}}"
+                                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" alt="">
+                            <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:1.7rem;"
+                                  th:text="${#strings.substring(#authentication.principal.fullName,0,1).toUpperCase()}">U</span>
+                            <a th:href="@{/profile}" class="npd-av-overlay"><i class="bi bi-pencil-fill"></i>Edit Photo</a>
+                        </div>
+                        <div class="npd-name" th:text="${#authentication.principal.fullName}">Full Name</div>
+                        <div class="npd-email" th:text="${#authentication.principal.username}">email</div>
+                        <div class="npd-badge">
+                            <i class="bi bi-shield-check"></i>
+                            <span th:text="${#authentication.principal.authorities[0].authority.replace('ROLE_','')}">USER</span>
+                        </div>
+                    </div>
+                    <div class="npd-group">
+                        <a th:href="@{/profile}"   class="npd-item"><i class="bi bi-person-circle"></i>My Profile</a>
+                        <a th:href="@{/orders}"    class="npd-item"><i class="bi bi-bag-check"></i>My Orders</a>
+                        <a th:href="@{/cart}"      class="npd-item"><i class="bi bi-bag"></i>Cart</a>
+                        <a th:href="@{/wholesale}" class="npd-item"><i class="bi bi-box-seam"></i>Wholesale</a>
+                    </div>
+                    <div class="npd-group" sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/dashboard}" class="npd-item">
+                            <i class="bi bi-speedometer2"></i>Admin Dashboard
+                            <span class="npd-item-badge">ADMIN</span>
+                        </a>
+                    </div>
+                    <div class="npd-group">
+                        <form th:action="@{/logout}" method="post" style="margin:0">
+                            <button type="submit" class="npd-item out"><i class="bi bi-box-arrow-right"></i>Sign Out</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <button class="nav-burger" id="navBurger"><i class="bi bi-list"></i></button>
+        </div>
+        <div class="npd-back" id="npdBack" onclick="npdClose()"></div>
+    </div>
+</header>
+
+<div class="mdrawer" id="mDrawer">
+    <div class="mdrawer-bd" id="mDrawerBd"></div>
+    <div class="mdrawer-panel">
+        <div class="mdrawer-head">
+            <div class="mdr-brand">
+                <div class="mdr-gem"><i class="bi bi-gem"></i></div>
+                <div class="mdr-name">GOLDEN <span>SPICES</span></div>
+            </div>
+            <button class="mdr-close" id="mDrawerClose"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <ul class="mdr-nav">
+            <li><a th:href="@{/}"><i class="bi bi-house-door"></i>Home</a></li>
+            <li><a th:href="@{/products}"><i class="bi bi-grid-3x3-gap"></i>Products</a></li>
+            <li class="mdr-div" sec:authorize="isAuthenticated()"></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/wholesale}"><i class="bi bi-box-seam"></i>Wholesale</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/orders}"><i class="bi bi-bag-check"></i>My Orders</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/cart}"><i class="bi bi-bag"></i>Cart</a></li>
+            <li class="mdr-div" sec:authorize="hasRole('ADMIN')"></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i>Admin Panel</a></li>
+        </ul>
+        <div class="mdr-footer">
+            <a th:href="@{/auth/login}" sec:authorize="!isAuthenticated()" class="btn-nav-login" style="justify-content:center">
+                <i class="bi bi-box-arrow-in-right"></i>Login
+            </a>
+            <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+                <button type="submit" class="btn-nav-logout" style="width:100%;justify-content:center">
+                    <i class="bi bi-box-arrow-right"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="flashzone">
+    <div class="flash-msg flash-ok" th:if="${success}" id="flashOk">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${success}"></span>
+        <button class="flash-x" onclick="this.closest('.flash-msg').remove()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="flash-msg flash-err" th:if="${error}" id="flashErr">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${error}"></span>
+        <button class="flash-x" onclick="this.closest('.flash-msg').remove()"><i class="bi bi-x-lg"></i></button>
+    </div>
+</div>
+
+<main th:replace="${content}"></main>
+
+<footer class="sitefooter">
+    <div class="footer-c2"></div>
+    <div class="footer-c3"></div>
+    <div class="footer-top">
+        <div>
+            <div class="footer-logo-row">
+                <div class="footer-gem"><i class="bi bi-gem"></i></div>
+                <div>
+                    <div class="footer-logo-name">GOLDEN</div>
+                    <div class="footer-logo-sub">Dissanayaka Distributors</div>
+                </div>
+            </div>
+            <p class="footer-tagline">Your trusted source for authentic<br>Sri Lankan spices since 1995.</p>
+            <div class="footer-rule"></div>
+            <div class="fcon"><i class="bi bi-geo-alt-fill"></i><span>96B/2, Old Kesbewa Road, Nugegoda</span></div>
+            <div class="fcon"><i class="bi bi-telephone-fill"></i><span><a href="tel:+94718579984" style="color:inherit;text-decoration:none;">071 857 9984</a> / <a href="https://wa.me/94777808259" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">077 780 8259</a></span></div>
+            <div class="fcon"><i class="bi bi-envelope-fill"></i><span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5a3d35363e3f343e3329293b343b233b313b1a3d373b333674393537">[email&#160;protected]</a></span></div>
+            <div class="fcon"><i class="bi bi-truck"></i><span>Island-wide delivery available</span></div>
+            <div class="footer-socials">
+                <a href="https://www.facebook.com/share/18LDgHNuQf/?mibextid=wwXIfr" target="_blank" rel="noopener" class="footer-soc" title="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="https://www.instagram.com/goldenp6308?utm_source=qr&igsh=NzJtYTcxOWI1emZx" target="_blank" rel="noopener" class="footer-soc" title="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="https://wa.me/94777808259" target="_blank" rel="noopener" class="footer-soc" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                <a href="https://wa.me/94777808259" target="_blank" rel="noopener" class="footer-soc" title="WhatsApp Message"><i class="bi bi-youtube"></i></a>
+            </div>
+        </div>
+        <div>
+            <div class="fcol-title">Quick Links</div>
+            <ul class="flinks">
+                <li><a th:href="@{/}"><i class="bi bi-chevron-right"></i>Home</a></li>
+                <li><a th:href="@{/products}"><i class="bi bi-chevron-right"></i>Products</a></li>
+                <li><a th:href="@{/wholesale}"><i class="bi bi-chevron-right"></i>Wholesale</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i>About Us</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i>Contact Us</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="fcol-title">Policies</div>
+            <ul class="flinks">
+                <li><a href="#"><i class="bi bi-chevron-right"></i>Privacy Policy</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i>Terms &amp; Conditions</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i>Return Policy</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i>Shipping Info</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i>FAQ</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="fcol-title">Find Us</div>
+            <div class="footer-map">
+                <iframe src="https://www.google.com/maps?q=96B/2+Old+Kesbewa+Road+Nugegoda&output=embed"
+                        width="100%" height="148" style="border:0" loading="lazy"></iframe>
+            </div>
+            <div class="fcol-title" style="margin-top:22px;">Stay Updated</div>
+            <div class="footer-nl">
+                <input type="email" placeholder="Your email address">
+                <button type="button">Subscribe</button>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>&#169; 2026 <span class="footer-bottom-brand">GOLDEN</span> &middot; Dissanayaka Distributors. All rights reserved.</span>
+        <span>Crafted with <i class="bi bi-heart-fill" style="color:var(--gl);font-size:.65rem;margin:0 2px"></i> in Sri Lanka</span>
+    </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* ── Profile dropdown ── */
+    function npdToggle(){const p=document.getElementById('npdPanel'),b=document.getElementById('npdBtn'),bk=document.getElementById('npdBack');const o=p.classList.contains('open');o?npdClose():(p.classList.add('open'),b.classList.add('open'),bk.classList.add('open'));}
+    function npdClose(){document.getElementById('npdPanel')?.classList.remove('open');document.getElementById('npdBtn')?.classList.remove('open');document.getElementById('npdBack')?.classList.remove('open');}
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')npdClose();});
+
+    const nav = document.getElementById('siteNav');
+    window.addEventListener('scroll', () => nav.classList.toggle('up', window.scrollY > 12), {passive:true});
+    const drawer=document.getElementById('mDrawer'),burger=document.getElementById('navBurger'),closeBt=document.getElementById('mDrawerClose'),bd=document.getElementById('mDrawerBd');
+    const open=()=>{drawer.classList.add('open');document.body.style.overflow='hidden';};
+    const close=()=>{drawer.classList.remove('open');document.body.style.overflow='';};
+    burger.addEventListener('click',open);closeBt.addEventListener('click',close);bd.addEventListener('click',close);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+    ['flashOk','flashErr'].forEach(id=>{const el=document.getElementById(id);if(!el)return;setTimeout(()=>{el.style.transition='opacity .5s';el.style.opacity='0';setTimeout(()=>el.remove(),500);},4500);});
+    /* ── Active nav link highlight ── */
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        if (a.href === window.location.href) a.classList.add('active');
+    });
+</script>
+</body>
+</html>

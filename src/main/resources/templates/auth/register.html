@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Create Account — GOLDEN')}">
+
+<main>
+    <style>
+        :root{--g:#c8841f;--gd:#8a5c0c;--gl:#e8a94a;--gp:#fdf4e3;--gpp:#f0d898;--dk:#1a1208;--bd:#3d2e14;--mu:#7a6444;--wh:#fff;--of:#faf7f2;--br:#e8dfc9;}
+        .auth-page{min-height:calc(100vh - 160px);display:flex;align-items:center;justify-content:center;padding:40px 20px;font-family:'Jost',sans-serif;background:var(--of);position:relative;overflow:hidden;}
+        .auth-page::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;border:1px solid rgba(200,132,31,.08);pointer-events:none;}
+        .auth-page::after{content:'';position:absolute;bottom:-80px;left:-80px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(200,132,31,.06);pointer-events:none;}
+
+        /* Card */
+        .auth-card{background:var(--wh);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.07);width:100%;max-width:500px;overflow:hidden;position:relative;z-index:1;}
+
+        /* Top */
+        .auth-card-top{background:linear-gradient(135deg,var(--gd),var(--g),var(--gl));padding:32px 40px 28px;text-align:center;position:relative;overflow:hidden;}
+        .auth-card-top::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.08);}
+        .auth-card-top::after{content:'';position:absolute;bottom:-30px;left:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06);}
+        .auth-icon{width:60px;height:60px;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.55rem;color:#fff;position:relative;z-index:1;}
+        .auth-title{font-family:'Cinzel',serif;font-size:1.45rem;font-weight:700;color:#fff;margin-bottom:5px;letter-spacing:.5px;position:relative;z-index:1;}
+        .auth-sub{font-size:.87rem;color:rgba(255,255,255,.75);position:relative;z-index:1;}
+
+        /* Body */
+        .auth-body{padding:30px 40px 36px;}
+
+        /* Alerts */
+        .auth-alert{display:flex;align-items:flex-start;gap:11px;padding:13px 16px;border-radius:10px;margin-bottom:20px;font-size:.88rem;font-weight:500;animation:slideDown .3s ease;}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .alert-err{background:#fff4f4;border:1px solid #f5b8b8;color:#a31515;}
+        .alert-err i{color:#e74c3c;font-size:1rem;flex-shrink:0;margin-top:1px;}
+
+        /* Row grid for 2-col */
+        .f-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+        /* Form fields */
+        .f-group{margin-bottom:18px;}
+        .f-label{display:block;font-size:.74rem;font-weight:700;color:var(--bd);letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px;}
+        .f-input-wrap{position:relative;}
+        .f-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mu);font-size:.9rem;pointer-events:none;transition:.2s;}
+        .f-input-wrap:focus-within .f-icon{color:var(--g);}
+        .f-input,.f-textarea{width:100%;padding:11px 40px 11px 38px;border:1.5px solid var(--br);border-radius:10px;font-size:.93rem;font-family:'Jost',sans-serif;color:var(--dk);background:var(--of);outline:none;transition:.25s;}
+        .f-input:focus,.f-textarea:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(200,132,31,.12);background:var(--wh);}
+        .f-textarea{padding:11px 13px 11px 38px;resize:none;min-height:80px;}
+        .f-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--mu);font-size:.9rem;padding:2px 4px;transition:.2s;}
+        .f-eye:hover{color:var(--g);}
+        .f-valid-icon{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:.88rem;display:none;}
+
+        /* For password fields that have eye button, shift valid icon */
+        .has-eye .f-valid-icon{right:34px;}
+
+        .f-input.valid  {border-color:#27ae60;background:var(--wh);}
+        .f-input.invalid{border-color:#e74c3c;background:#fff8f8;}
+        .f-textarea.valid  {border-color:#27ae60;}
+        .f-textarea.invalid{border-color:#e74c3c;}
+        .f-input.valid   ~ .f-valid-icon.ok  {display:block;color:#27ae60;}
+        .f-input.invalid ~ .f-valid-icon.err {display:block;color:#e74c3c;}
+        .f-msg{font-size:.74rem;margin-top:5px;display:flex;align-items:center;gap:5px;min-height:17px;}
+        .f-msg.ok {color:#27ae60;}
+        .f-msg.err{color:#e74c3c;}
+
+        /* Password strength meter */
+        .pwd-strength{margin-top:8px;}
+        .pwd-bars{display:flex;gap:4px;margin-bottom:5px;}
+        .pwd-bar{flex:1;height:4px;border-radius:2px;background:var(--br);transition:.3s;}
+        .pwd-bar.weak   {background:#e74c3c;}
+        .pwd-bar.fair   {background:#f39c12;}
+        .pwd-bar.good   {background:#3498db;}
+        .pwd-bar.strong {background:#27ae60;}
+        .pwd-label{font-size:.73rem;font-weight:600;}
+        .pwd-label.weak   {color:#e74c3c;}
+        .pwd-label.fair   {color:#f39c12;}
+        .pwd-label.good   {color:#3498db;}
+        .pwd-label.strong {color:#27ae60;}
+
+        /* Requirements checklist */
+        .pwd-reqs{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:8px;}
+        .pwd-req{font-size:.73rem;color:var(--mu);display:flex;align-items:center;gap:5px;transition:.2s;}
+        .pwd-req i{font-size:.76rem;color:var(--br);}
+        .pwd-req.met{color:#27ae60;}
+        .pwd-req.met i{color:#27ae60;}
+
+        /* Terms checkbox */
+        .f-check{display:flex;align-items:flex-start;gap:10px;margin:18px 0 22px;}
+        .f-check input[type=checkbox]{width:17px;height:17px;accent-color:var(--g);cursor:pointer;flex-shrink:0;margin-top:2px;}
+        .f-check label{font-size:.84rem;color:var(--mu);cursor:pointer;line-height:1.5;}
+        .f-check a{color:var(--g);font-weight:700;text-decoration:none;}
+
+        /* Submit */
+        .btn-auth{width:100%;padding:13px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;font-family:'Jost',sans-serif;cursor:pointer;transition:.28s;letter-spacing:.3px;box-shadow:0 5px 18px rgba(200,132,31,.32);display:flex;align-items:center;justify-content:center;gap:9px;}
+        .btn-auth:hover{background:linear-gradient(135deg,var(--g),var(--gl));transform:translateY(-1px);box-shadow:0 7px 24px rgba(200,132,31,.44);}
+        .btn-auth:disabled{opacity:.65;cursor:not-allowed;transform:none;}
+
+        /* Sign in link */
+        .auth-div{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--mu);font-size:.8rem;}
+        .auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--br);}
+        .auth-login-link{text-align:center;font-size:.88rem;color:var(--mu);}
+        .auth-login-link a{color:var(--g);font-weight:700;text-decoration:none;}
+        .auth-login-link a:hover{text-decoration:underline;}
+
+        /* Server errors from Spring Validation */
+        .srv-err{font-size:.76rem;color:#a31515;margin-top:5px;display:flex;align-items:center;gap:5px;}
+        .srv-err i{flex-shrink:0;}
+
+        @media(max-width:540px){.f-row{grid-template-columns:1fr;gap:0;}.auth-body{padding:24px 22px 28px;}.auth-card-top{padding:26px 22px 22px;}.pwd-reqs{grid-template-columns:1fr;}}
+    </style>
+
+    <div class="auth-page">
+        <div class="auth-card">
+
+            <div class="auth-card-top">
+                <div class="auth-icon"><i class="bi bi-person-plus-fill"></i></div>
+                <div class="auth-title">Create Account</div>
+                <div class="auth-sub">Join GOLDEN — Sri Lanka's Premium Spices</div>
+            </div>
+
+            <div class="auth-body">
+
+                <!-- Server-side error (e.g. email already exists) -->
+                <div class="auth-alert alert-err" th:if="${error}">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span th:text="${error}">Error</span>
+                </div>
+
+                <form th:action="@{/auth/register}" method="post"
+                      th:object="${registerRequest}" id="regForm" novalidate>
+
+                    <!-- Full Name -->
+                    <div class="f-group">
+                        <label class="f-label" for="fullName">Full Name</label>
+                        <div class="f-input-wrap">
+                            <i class="bi bi-person f-icon"></i>
+                            <input class="f-input" id="fullName" th:field="*{fullName}" type="text"
+                                   placeholder="e.g. Kanishka Perera" required
+                                   th:classappend="${#fields.hasErrors('fullName')} ? 'invalid' : ''">
+                            <i class="bi bi-check-circle f-valid-icon ok"></i>
+                            <i class="bi bi-x-circle f-valid-icon err"></i>
+                        </div>
+                        <!-- Server validation error -->
+                        <div class="srv-err" th:if="${#fields.hasErrors('fullName')}">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span th:errors="*{fullName}">Error</span>
+                        </div>
+                        <div class="f-msg" id="nameMsg"></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="f-group">
+                        <label class="f-label" for="regEmail">Email Address</label>
+                        <div class="f-input-wrap">
+                            <i class="bi bi-envelope f-icon"></i>
+                            <input class="f-input" id="regEmail" th:field="*{email}" type="email"
+                                   placeholder="your@email.com" required
+                                   th:classappend="${#fields.hasErrors('email')} ? 'invalid' : ''">
+                            <i class="bi bi-check-circle f-valid-icon ok"></i>
+                            <i class="bi bi-x-circle f-valid-icon err"></i>
+                        </div>
+                        <div class="srv-err" th:if="${#fields.hasErrors('email')}">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span th:errors="*{email}">Error</span>
+                        </div>
+                        <div class="f-msg" id="emailMsg"></div>
+                    </div>
+
+                    <!-- Phone + Address row -->
+                    <div class="f-row">
+                        <div class="f-group">
+                            <label class="f-label" for="phone">Phone <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--mu)">(optional)</span></label>
+                            <div class="f-input-wrap">
+                                <i class="bi bi-telephone f-icon"></i>
+                                <input class="f-input" id="phone" th:field="*{phone}" type="text"
+                                       placeholder="0771234567" inputmode="numeric"
+                                       pattern="[0-9]*" maxlength="15" autocomplete="tel">
+                                <i class="bi bi-check-circle f-valid-icon ok"></i>
+                                <i class="bi bi-x-circle f-valid-icon err"></i>
+                            </div>
+                            <div class="f-msg" id="phoneMsg"></div>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label" for="address">City <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--mu)">(optional)</span></label>
+                            <div class="f-input-wrap">
+                                <i class="bi bi-geo-alt f-icon"></i>
+                                <input class="f-input" id="address" th:field="*{address}" type="text"
+                                       placeholder="Colombo, Kandy...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="f-group">
+                        <label class="f-label" for="regPwd">Password</label>
+                        <div class="f-input-wrap has-eye">
+                            <i class="bi bi-lock f-icon"></i>
+                            <input class="f-input" id="regPwd" th:field="*{password}" type="password"
+                                   placeholder="Create a strong password" required autocomplete="new-password"
+                                   th:classappend="${#fields.hasErrors('password')} ? 'invalid' : ''">
+                            <button type="button" class="f-eye" id="togglePwd1" tabindex="-1">
+                                <i class="bi bi-eye" id="eyeIcon1"></i>
+                            </button>
+                            <i class="bi bi-check-circle f-valid-icon ok"></i>
+                            <i class="bi bi-x-circle f-valid-icon err"></i>
+                        </div>
+                        <div class="srv-err" th:if="${#fields.hasErrors('password')}">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span th:errors="*{password}">Error</span>
+                        </div>
+                        <!-- Strength meter -->
+                        <div class="pwd-strength" id="strengthMeter" style="display:none">
+                            <div class="pwd-bars">
+                                <div class="pwd-bar" id="bar1"></div>
+                                <div class="pwd-bar" id="bar2"></div>
+                                <div class="pwd-bar" id="bar3"></div>
+                                <div class="pwd-bar" id="bar4"></div>
+                            </div>
+                            <span class="pwd-label" id="strengthLabel"></span>
+                        </div>
+                        <!-- Requirements -->
+                        <div class="pwd-reqs" id="pwdReqs" style="display:none">
+                            <div class="pwd-req" id="req-len"><i class="bi bi-x-circle"></i>Min. 8 characters</div>
+                            <div class="pwd-req" id="req-upper"><i class="bi bi-x-circle"></i>Uppercase letter</div>
+                            <div class="pwd-req" id="req-lower"><i class="bi bi-x-circle"></i>Lowercase letter</div>
+                            <div class="pwd-req" id="req-num"><i class="bi bi-x-circle"></i>Number</div>
+                        </div>
+                        <div class="f-msg" id="pwdMsg"></div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="f-group">
+                        <label class="f-label" for="confirmPwd">Confirm Password</label>
+                        <div class="f-input-wrap has-eye">
+                            <i class="bi bi-lock-fill f-icon"></i>
+                            <input class="f-input" id="confirmPwd" th:field="*{confirmPassword}" type="password"
+                                   placeholder="Re-enter your password" required autocomplete="new-password"
+                                   th:classappend="${#fields.hasErrors('confirmPassword')} ? 'invalid' : ''">
+                            <button type="button" class="f-eye" id="togglePwd2" tabindex="-1">
+                                <i class="bi bi-eye" id="eyeIcon2"></i>
+                            </button>
+                            <i class="bi bi-check-circle f-valid-icon ok"></i>
+                            <i class="bi bi-x-circle f-valid-icon err"></i>
+                        </div>
+                        <div class="srv-err" th:if="${#fields.hasErrors('confirmPassword')}">
+                            <i class="bi bi-exclamation-circle"></i>
+                            <span th:errors="*{confirmPassword}">Error</span>
+                        </div>
+                        <div class="f-msg" id="confirmMsg"></div>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="f-check">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">
+                            I agree to the <a href="#">Terms &amp; Conditions</a> and
+                            <a href="#">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-auth" id="regBtn">
+                        <i class="bi bi-person-check-fill"></i> Create Account
+                    </button>
+                </form>
+
+                <div class="auth-div">already a member?</div>
+                <div class="auth-login-link">
+                    <a th:href="@{/auth/login}">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In to Your Account
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ══════════════════════════════════════
+           REGISTER PAGE — Full validation
+        ══════════════════════════════════════ */
+        const nameInput    = document.getElementById('fullName');
+        const emailInput   = document.getElementById('regEmail');
+        const phoneInput   = document.getElementById('phone');
+        const pwdInput     = document.getElementById('regPwd');
+        const confirmInput = document.getElementById('confirmPwd');
+        const termsBox     = document.getElementById('terms');
+        const regBtn       = document.getElementById('regBtn');
+
+        /* ── Password toggle ── */
+        function makeToggle(btnId, iconId, inputEl) {
+            document.getElementById(btnId).addEventListener('click', () => {
+                const isText = inputEl.type === 'text';
+                inputEl.type = isText ? 'password' : 'text';
+                document.getElementById(iconId).className = isText ? 'bi bi-eye' : 'bi bi-eye-slash';
+            });
+        }
+        makeToggle('togglePwd1', 'eyeIcon1', pwdInput);
+        makeToggle('togglePwd2', 'eyeIcon2', confirmInput);
+
+        /* ── Helper: set field state ── */
+        function setField(input, msgEl, type, msg) {
+            input.classList.remove('valid', 'invalid');
+            input.classList.add(type === 'ok' ? 'valid' : 'invalid');
+            if (msgEl) {
+                msgEl.className = 'f-msg ' + (type === 'ok' ? 'ok' : 'err');
+                msgEl.innerHTML = msg
+                    ? `<i class="bi bi-${type === 'ok' ? 'check' : 'exclamation-circle'}"></i>${msg}`
+                    : '';
+            }
+        }
+        function clearField(input, msgEl) {
+            input.classList.remove('valid', 'invalid');
+            if (msgEl) { msgEl.className = 'f-msg'; msgEl.innerHTML = ''; }
+        }
+
+        /* ── Validators ── */
+        function validateName() {
+            const v = nameInput.value.trim();
+            if (!v)        { setField(nameInput, document.getElementById('nameMsg'), 'err', 'Full name is required'); return false; }
+            if (v.length < 3) { setField(nameInput, document.getElementById('nameMsg'), 'err', 'Name must be at least 3 characters'); return false; }
+            if (v.length > 80){ setField(nameInput, document.getElementById('nameMsg'), 'err', 'Name must be under 80 characters'); return false; }
+            setField(nameInput, document.getElementById('nameMsg'), 'ok', 'Looks good!');
+            return true;
+        }
+
+        function validateEmail() {
+            const v  = emailInput.value.trim();
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!v)        { setField(emailInput, document.getElementById('emailMsg'), 'err', 'Email is required'); return false; }
+            if (!re.test(v)) { setField(emailInput, document.getElementById('emailMsg'), 'err', 'Enter a valid email address'); return false; }
+            setField(emailInput, document.getElementById('emailMsg'), 'ok', 'Looks good!');
+            return true;
+        }
+
+        function validatePhone() {
+            const v = phoneInput.value.trim();
+            if (!v) { clearField(phoneInput, document.getElementById('phoneMsg')); return true; } // optional
+            // Only digits allowed
+            if (!/^[0-9]+$/.test(v)) {
+                setField(phoneInput, document.getElementById('phoneMsg'), 'err', 'Phone number must contain digits only');
+                return false;
+            }
+            if (v.length < 7)  { setField(phoneInput, document.getElementById('phoneMsg'), 'err', 'Phone number is too short (min 7 digits)'); return false; }
+            if (v.length > 15) { setField(phoneInput, document.getElementById('phoneMsg'), 'err', 'Phone number is too long (max 15 digits)');  return false; }
+            setField(phoneInput, document.getElementById('phoneMsg'), 'ok', 'Valid number');
+            return true;
+        }
+
+        function getStrength(v) {
+            let score = 0;
+            if (v.length >= 8)  score++;
+            if (/[A-Z]/.test(v)) score++;
+            if (/[a-z]/.test(v)) score++;
+            if (/[0-9]/.test(v)) score++;
+            if (/[^A-Za-z0-9]/.test(v)) score++;
+            return score;
+        }
+
+        function updateStrengthUI(v) {
+            const meter  = document.getElementById('strengthMeter');
+            const reqs   = document.getElementById('pwdReqs');
+            const label  = document.getElementById('strengthLabel');
+            const bars   = [document.getElementById('bar1'), document.getElementById('bar2'),
+                document.getElementById('bar3'), document.getElementById('bar4')];
+
+            if (!v) { meter.style.display = 'none'; reqs.style.display = 'none'; return; }
+            meter.style.display = 'block';
+            reqs.style.display  = 'grid';
+
+            const score = getStrength(v);
+            const levels = ['', 'weak', 'fair', 'good', 'strong', 'strong'];
+            const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+            const lvl = levels[Math.min(score, 4)];
+
+            bars.forEach((b, i) => {
+                b.className = 'pwd-bar';
+                if (i < Math.min(score, 4)) b.classList.add(lvl);
+            });
+            label.className = 'pwd-label ' + lvl;
+            label.textContent = labels[Math.min(score, 4)];
+
+            // Requirements
+            function setReq(id, met) {
+                const el = document.getElementById(id);
+                el.className = 'pwd-req' + (met ? ' met' : '');
+                el.querySelector('i').className = met ? 'bi bi-check-circle-fill' : 'bi bi-x-circle';
+            }
+            setReq('req-len',   v.length >= 8);
+            setReq('req-upper', /[A-Z]/.test(v));
+            setReq('req-lower', /[a-z]/.test(v));
+            setReq('req-num',   /[0-9]/.test(v));
+        }
+
+        function validatePassword() {
+            const v = pwdInput.value;
+            updateStrengthUI(v);
+            if (!v)        { setField(pwdInput, document.getElementById('pwdMsg'), 'err', 'Password is required'); return false; }
+            if (v.length < 6) { setField(pwdInput, document.getElementById('pwdMsg'), 'err', 'Password must be at least 6 characters'); return false; }
+            setField(pwdInput, document.getElementById('pwdMsg'), 'ok', '');
+            return true;
+        }
+
+        function validateConfirm() {
+            const v  = confirmInput.value;
+            const p  = pwdInput.value;
+            const msg = document.getElementById('confirmMsg');
+            if (!v)    { setField(confirmInput, msg, 'err', 'Please confirm your password'); return false; }
+            if (v !== p) { setField(confirmInput, msg, 'err', 'Passwords do not match'); return false; }
+            setField(confirmInput, msg, 'ok', 'Passwords match!');
+            return true;
+        }
+
+        /* ── Live listeners ── */
+        nameInput.addEventListener('blur',    validateName);
+        nameInput.addEventListener('input',   () => { if(nameInput.classList.contains('invalid')) validateName(); });
+        emailInput.addEventListener('blur',   validateEmail);
+        emailInput.addEventListener('input',  () => { if(emailInput.classList.contains('invalid')) validateEmail(); });
+        // Block non-numeric keystrokes on phone field
+        phoneInput.addEventListener('keypress', function(e) {
+            if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+        // Block paste of non-numeric content
+        phoneInput.addEventListener('paste', function(e) {
+            const pasted = (e.clipboardData || window.clipboardData).getData('text');
+            if (!/^[0-9]+$/.test(pasted)) { e.preventDefault(); }
+        });
+        phoneInput.addEventListener('blur',   validatePhone);
+        phoneInput.addEventListener('input',  () => { if(phoneInput.classList.contains('invalid')) validatePhone(); });
+        pwdInput.addEventListener('input',    () => { validatePassword(); if(confirmInput.value) validateConfirm(); });
+        pwdInput.addEventListener('blur',     validatePassword);
+        confirmInput.addEventListener('input',  validateConfirm);
+        confirmInput.addEventListener('blur',   validateConfirm);
+
+        /* ── Submit ── */
+        document.getElementById('regForm').addEventListener('submit', function(e) {
+            const ok = [validateName(), validateEmail(), validatePhone(), validatePassword(), validateConfirm()].every(Boolean);
+            if (!ok) {
+                e.preventDefault();
+                regBtn.style.animation = 'shake .4s ease';
+                setTimeout(() => regBtn.style.animation = '', 400);
+                // Scroll to first error
+                const first = document.querySelector('.f-input.invalid');
+                if (first) first.scrollIntoView({ behavior:'smooth', block:'center' });
+                return;
+            }
+            if (!termsBox.checked) {
+                e.preventDefault();
+                termsBox.style.outline = '2px solid #e74c3c';
+                termsBox.style.outlineOffset = '2px';
+                alert('Please agree to the Terms & Conditions to continue.');
+                return;
+            }
+            regBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Creating Account...';
+            regBtn.disabled = true;
+        });
+    </script>
+
+    <style>
+        @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+    </style>
+</main>
+</html>

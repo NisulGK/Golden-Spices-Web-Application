@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Delivery Address')}">
+<main>
+    <style>
+        :root{--g:#c8841f;--gd:#8a5c0c;--gl:#e8a94a;--gp:#fdf4e3;--gpp:#f0d898;--dk:#1a1208;--bd:#3d2e14;--mu:#7a6444;--wh:#fff;--of:#faf7f2;--br:#e8dfc9;}
+        .form-wrap{max-width:680px;margin:0 auto;padding:40px 32px 72px;font-family:'Jost',sans-serif;}
+        .form-card{background:var(--wh);border:1px solid var(--br);border-radius:18px;padding:36px 40px;box-shadow:0 4px 24px rgba(0,0,0,.07);}
+        .form-hd{margin-bottom:28px;padding-bottom:20px;border-bottom:1.5px solid var(--br);}
+        .form-hd-tag{font-size:.63rem;letter-spacing:5px;text-transform:uppercase;color:var(--g);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+        .form-hd-tag::before{content:'';width:26px;height:2px;background:linear-gradient(90deg,var(--gd),var(--g));border-radius:2px;}
+        .form-title{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;color:var(--dk);}
+
+        .f-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+        .f-group{margin-bottom:18px;}
+        .f-lbl{display:block;font-size:.74rem;font-weight:700;color:var(--bd);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;}
+        .f-lbl .opt{font-weight:400;font-size:.7rem;text-transform:none;letter-spacing:0;color:var(--mu);}
+        .f-wrap{position:relative;}
+        .f-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mu);font-size:.9rem;pointer-events:none;}
+        .f-wrap:focus-within .f-icon{color:var(--g);}
+        .f-input{width:100%;padding:11px 13px 11px 38px;border:1.5px solid var(--br);border-radius:10px;font-size:.93rem;font-family:'Jost',sans-serif;color:var(--dk);background:var(--of);outline:none;transition:.2s;}
+        .f-input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(200,132,31,.12);background:var(--wh);}
+        .f-input.is-invalid{border-color:#e74c3c;background:#fff8f8;}
+        .f-err{font-size:.75rem;color:#a31515;margin-top:5px;display:flex;align-items:center;gap:5px;}
+        .f-err i{font-size:.78rem;}
+
+        /* Checkbox */
+        .f-check{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+        .f-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--g);cursor:pointer;}
+        .f-check label{font-size:.88rem;color:var(--bd);cursor:pointer;font-weight:500;}
+
+        /* Buttons */
+        .form-actions{display:flex;gap:12px;margin-top:4px;}
+        .btn-save{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;border-radius:9px;font-size:.9rem;font-weight:700;font-family:'Jost',sans-serif;cursor:pointer;transition:.25s;box-shadow:0 4px 16px rgba(200,132,31,.28);}
+        .btn-save:hover{background:linear-gradient(135deg,var(--g),var(--gl));transform:translateY(-1px);}
+        .btn-cancel{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:var(--wh);color:var(--mu);border:1.5px solid var(--br);border-radius:9px;font-size:.88rem;font-weight:600;font-family:'Jost',sans-serif;cursor:pointer;transition:.2s;text-decoration:none;}
+        .btn-cancel:hover{border-color:var(--g);color:var(--g);background:var(--gp);}
+
+        @media(max-width:560px){.f-row{grid-template-columns:1fr;}.form-card{padding:24px 20px;}.form-wrap{padding:24px 14px 52px;}}
+    </style>
+
+    <div class="form-wrap">
+        <div class="form-card">
+            <div class="form-hd">
+                <div class="form-hd-tag">Delivery Address</div>
+                <h1 class="form-title" th:text="${editMode} ? 'Edit Address' : 'Add New Address'">Address</h1>
+            </div>
+
+            <form th:action="${editMode} ? @{/addresses/{id}/edit(id=${addressId})} : @{/addresses/new}"
+                  method="post" th:object="${req}" novalidate>
+
+                <!-- Label -->
+                <div class="f-group">
+                    <label class="f-lbl" for="label">Address Label</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-tag f-icon"></i>
+                        <input class="f-input" id="label" th:field="*{label}" type="text"
+                               placeholder="e.g. Home, Office, Parents' House"
+                               th:classappend="${#fields.hasErrors('label')} ? ' is-invalid' : ''">
+                    </div>
+                    <div class="f-err" th:if="${#fields.hasErrors('label')}">
+                        <i class="bi bi-exclamation-circle"></i><span th:errors="*{label}">Error</span>
+                    </div>
+                </div>
+
+                <!-- Name + Phone -->
+                <div class="f-row">
+                    <div class="f-group">
+                        <label class="f-lbl" for="rname">Recipient Name</label>
+                        <div class="f-wrap">
+                            <i class="bi bi-person f-icon"></i>
+                            <input class="f-input" id="rname" th:field="*{recipientName}" type="text"
+                                   placeholder="Full name"
+                                   th:classappend="${#fields.hasErrors('recipientName')} ? ' is-invalid' : ''">
+                        </div>
+                        <div class="f-err" th:if="${#fields.hasErrors('recipientName')}">
+                            <i class="bi bi-exclamation-circle"></i><span th:errors="*{recipientName}">Error</span>
+                        </div>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-lbl" for="phone">Phone Number</label>
+                        <div class="f-wrap">
+                            <i class="bi bi-telephone f-icon"></i>
+                            <input class="f-input" id="phone" th:field="*{phone}" type="text"
+                                   placeholder="0771234567" inputmode="numeric" maxlength="15"
+                                   th:classappend="${#fields.hasErrors('phone')} ? ' is-invalid' : ''">
+                        </div>
+                        <div class="f-err" th:if="${#fields.hasErrors('phone')}">
+                            <i class="bi bi-exclamation-circle"></i><span th:errors="*{phone}">Error</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Line 1 -->
+                <div class="f-group">
+                    <label class="f-lbl" for="addr1">Address Line 1</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-house f-icon"></i>
+                        <input class="f-input" id="addr1" th:field="*{addressLine1}" type="text"
+                               placeholder="House/Building number, Street name"
+                               th:classappend="${#fields.hasErrors('addressLine1')} ? ' is-invalid' : ''">
+                    </div>
+                    <div class="f-err" th:if="${#fields.hasErrors('addressLine1')}">
+                        <i class="bi bi-exclamation-circle"></i><span th:errors="*{addressLine1}">Error</span>
+                    </div>
+                </div>
+
+                <!-- Address Line 2 -->
+                <div class="f-group">
+                    <label class="f-lbl" for="addr2">Address Line 2 <span class="opt">(optional)</span></label>
+                    <div class="f-wrap">
+                        <i class="bi bi-signpost f-icon"></i>
+                        <input class="f-input" id="addr2" th:field="*{addressLine2}" type="text"
+                               placeholder="Apartment, floor, landmark...">
+                    </div>
+                </div>
+
+                <!-- City + District + Postal -->
+                <div class="f-row">
+                    <div class="f-group">
+                        <label class="f-lbl" for="city">City</label>
+                        <div class="f-wrap">
+                            <i class="bi bi-buildings f-icon"></i>
+                            <input class="f-input" id="city" th:field="*{city}" type="text"
+                                   placeholder="Colombo, Kandy..."
+                                   th:classappend="${#fields.hasErrors('city')} ? ' is-invalid' : ''">
+                        </div>
+                        <div class="f-err" th:if="${#fields.hasErrors('city')}">
+                            <i class="bi bi-exclamation-circle"></i><span th:errors="*{city}">Error</span>
+                        </div>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-lbl" for="district">District <span class="opt">(optional)</span></label>
+                        <div class="f-wrap">
+                            <i class="bi bi-map f-icon"></i>
+                            <input class="f-input" id="district" th:field="*{district}" type="text" placeholder="e.g. Western">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="f-group" style="max-width:220px">
+                    <label class="f-lbl" for="postal">Postal Code</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-mailbox f-icon"></i>
+                        <input class="f-input" id="postal" th:field="*{postalCode}" type="text"
+                               placeholder="00100" maxlength="5" inputmode="numeric"
+                               th:classappend="${#fields.hasErrors('postalCode')} ? ' is-invalid' : ''">
+                    </div>
+                    <div class="f-err" th:if="${#fields.hasErrors('postalCode')}">
+                        <i class="bi bi-exclamation-circle"></i><span th:errors="*{postalCode}">Error</span>
+                    </div>
+                </div>
+
+                <!-- Default checkbox -->
+                <div class="f-check">
+                    <input type="checkbox" id="isDefault" th:field="*{isDefault}">
+                    <label for="isDefault">Set as my default delivery address</label>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span th:text="${editMode} ? 'Update Address' : 'Save Address'">Save</span>
+                    </button>
+                    <a th:href="@{/addresses}" class="btn-cancel">
+                        <i class="bi bi-x"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Phone digits only
+        const ph = document.getElementById('phone');
+        ph.addEventListener('keypress', e => {
+            if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight'].includes(e.key))
+                e.preventDefault();
+        });
+        // Postal code digits only
+        const pc = document.getElementById('postal');
+        pc.addEventListener('keypress', e => {
+            if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight'].includes(e.key))
+                e.preventDefault();
+        });
+    </script>
+</main>
+</html>

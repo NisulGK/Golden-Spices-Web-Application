@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Checkout')}">
+
+<main>
+    <div class="container py-4">
+
+        <h2 class="mb-4"><i class="bi bi-credit-card"></i> Checkout</h2>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-7">
+                <form th:action="@{/checkout/create-order}" method="post" id="checkoutForm">
+
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Full Name *</label>
+                                <input type="text" name="customerName" class="form-control"
+                                       th:value="${userName}"
+                                       placeholder="Enter your full name"
+                                       required minlength="3" maxlength="100">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Email Address *</label>
+                                    <input type="email" name="customerEmail" class="form-control"
+                                           th:value="${userEmail}"
+                                           placeholder="your@email.com" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Phone Number *</label>
+                                    <input type="tel" name="customerPhone" class="form-control"
+                                           th:value="${userPhone}"
+                                           placeholder="071 857 9984" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Delivery Address *</label>
+                                <textarea name="deliveryAddress" class="form-control" rows="3"
+                                          placeholder="House no, street, city, postal code"
+                                          required th:text="${userAddress}"></textarea>
+                                <small class="text-muted">Please include street, city and postal code</small>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold">Order Notes (Optional)</label>
+                                <textarea name="notes" class="form-control" rows="2"
+                                          placeholder="Any special instructions for delivery?"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="bi bi-wallet2 me-2"></i>Payment Method</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3 p-3 border rounded">
+                                <input class="form-check-input payment-method" type="radio" name="paymentMethod"
+                                       id="paymentCOD" value="cod" checked>
+                                <label class="form-check-label w-100" for="paymentCOD">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <strong><i class="bi bi-cash-coin text-success me-1"></i>Cash on Delivery</strong>
+                                            <p class="mb-0 small text-muted">Pay when you receive your order</p>
+                                        </div>
+                                        <i class="bi bi-truck fs-4 text-success"></i>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="form-check p-3 border rounded">
+                                <input class="form-check-input payment-method" type="radio" name="paymentMethod"
+                                       id="paymentCard" value="card">
+                                <label class="form-check-label w-100" for="paymentCard">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <strong><i class="bi bi-credit-card-2-front text-primary me-1"></i>Credit / Debit Card</strong>
+                                            <p class="mb-0 small text-muted">Demo card payment with validation + PDF email receipt</p>
+                                        </div>
+                                        <i class="bi bi-shield-check text-success fs-4"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4 shadow-sm d-none" id="cardPaymentBox">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i>Card Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info py-2 small mb-3">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Demo Mode</strong> — No real payment is processed.<br>
+                                Use any 16-digit number, any future expiry date, and any 3-digit CVV.
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="fillDemoCard">
+                                        <i class="bi bi-magic me-1"></i>Fill Demo Card
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Card Holder Name *</label>
+                                <input type="text" class="form-control card-field"
+                                       name="cardName" id="cardName"
+                                       placeholder="e.g. John Silva">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Card Number *</label>
+                                <input type="text" class="form-control card-field"
+                                       name="cardNumber" id="cardNumber"
+                                       placeholder="1234 5678 9012 3456"
+                                       maxlength="19" inputmode="numeric">
+                                <small class="text-muted">Any 16-digit number works in demo mode</small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Expiry Month *</label>
+                                    <input type="text" class="form-control card-field"
+                                           name="expiryMonth" id="expiryMonth"
+                                           placeholder="MM" maxlength="2" inputmode="numeric">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Expiry Year *</label>
+                                    <input type="text" class="form-control card-field"
+                                           name="expiryYear" id="expiryYear"
+                                           placeholder="YYYY" maxlength="4" inputmode="numeric">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">CVV *</label>
+                                    <input type="password" class="form-control card-field"
+                                           name="cvv" id="cvv"
+                                           placeholder="123" maxlength="3" inputmode="numeric">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold">
+                        <i class="bi bi-check-circle me-2"></i>Place Order
+                    </button>
+                    <a href="/cart" class="btn btn-outline-secondary w-100 rounded-pill mt-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Cart
+                    </a>
+
+                </form>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card shadow sticky-top" style="top:100px;">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div style="max-height:280px; overflow-y:auto;" class="mb-3">
+                            <div th:each="item : ${items}"
+                                 class="d-flex justify-content-between align-items-start pb-2 mb-2 border-bottom">
+                                <div class="flex-grow-1 pe-2">
+                                    <div class="fw-semibold small"
+                                         th:text="${item.product.brand + ' ' + item.product.name}">
+                                        Product
+                                    </div>
+                                    <small class="text-muted"
+                                           th:text="${item.product.sizeLabel + ' × ' + item.quantity}">
+                                        1kg × 1
+                                    </small>
+                                </div>
+                                <span class="fw-bold small text-danger"
+                                      th:text="'LKR ' + ${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">
+                                    LKR 0.00
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr class="my-2">
+
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span>Subtotal</span>
+                            <span th:text="'LKR ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span>Delivery</span>
+                            <span class="text-success fw-bold">FREE</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong class="fs-5">Total</strong>
+                            <strong class="fs-4 text-primary"
+                                    th:text="'LKR ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">
+                                LKR 0.00
+                            </strong>
+                        </div>
+
+                        <div class="alert alert-success mb-0 py-2 small">
+                            <i class="bi bi-shield-check me-1"></i>
+                            <strong>Secure Demo Checkout</strong><br>
+                            Valid card entries will simulate successful payment.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const paymentRadios = document.querySelectorAll('.payment-method');
+        const cardPaymentBox = document.getElementById('cardPaymentBox');
+        const cardFields = document.querySelectorAll('.card-field');
+        const checkoutForm = document.getElementById('checkoutForm');
+
+        function toggleCardFields() {
+            const selected = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+            const isCard = selected === 'card';
+
+            cardPaymentBox.classList.toggle('d-none', !isCard);
+
+            cardFields.forEach(field => {
+                field.required = isCard;
+            });
+        }
+
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', toggleCardFields);
+        });
+
+        toggleCardFields();
+
+        const cardNumber = document.getElementById('cardNumber');
+        const expiryMonth = document.getElementById('expiryMonth');
+        const expiryYear = document.getElementById('expiryYear');
+        const cvv = document.getElementById('cvv');
+
+        if (cardNumber) {
+            cardNumber.addEventListener('input', function () {
+                let value = this.value.replace(/\D/g, '').substring(0, 16);
+                this.value = value.replace(/(.{4})/g, '$1 ').trim();
+            });
+        }
+
+        [expiryMonth, expiryYear, cvv].forEach(input => {
+            if (!input) return;
+            input.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '');
+            });
+        });
+
+        // Fill demo card details with one click
+        const fillDemoBtn = document.getElementById('fillDemoCard');
+        if (fillDemoBtn) {
+            fillDemoBtn.addEventListener('click', function () {
+                document.getElementById('cardName').value = 'Demo User';
+                document.getElementById('cardNumber').value = '1234 5678 9012 3456';
+                document.getElementById('expiryMonth').value = '12';
+                document.getElementById('expiryYear').value = '2030';
+                document.getElementById('cvv').value = '123';
+            });
+        }
+
+        checkoutForm.addEventListener('submit', function (e) {
+            const selected = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+            if (selected !== 'card') return;
+
+            const cardName = document.getElementById('cardName').value.trim();
+            const cardDigits = document.getElementById('cardNumber').value.replace(/\D/g, '');
+            const mm = document.getElementById('expiryMonth').value.trim();
+            const yyyy = document.getElementById('expiryYear').value.trim();
+            const cvvVal = document.getElementById('cvv').value.trim();
+
+            if (!cardName) {
+                e.preventDefault();
+                alert('Card holder name is required.');
+                return;
+            }
+
+            if (cardDigits.length !== 16) {
+                e.preventDefault();
+                alert('Card number must contain exactly 16 digits.');
+                return;
+            }
+
+            if (mm.length < 1 || Number(mm) < 1 || Number(mm) > 12) {
+                e.preventDefault();
+                alert('Expiry month must be between 1 and 12.');
+                return;
+            }
+
+            if (yyyy.length !== 4) {
+                e.preventDefault();
+                alert('Expiry year must be 4 digits.');
+                return;
+            }
+
+            if (cvvVal.length !== 3) {
+                e.preventDefault();
+                alert('CVV must contain exactly 3 digits.');
+            }
+        });
+    </script>
+</main>
+</html>

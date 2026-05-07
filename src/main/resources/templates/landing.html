@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::main}, 'GOLDEN | Premium Sri Lankan Spices')}">
+<main>
+    <style>
+        /* ══════════════════════════════════════════════════════
+           GOLDEN LANDING — World-Class Premium Edition
+           All graphics are pure CSS/SVG — no external files
+        ══════════════════════════════════════════════════════ */
+        :root {
+            --g:#c8841f; --gd:#8a5c0c; --gl:#e8a94a; --gp:#fdf4e3; --gpp:#f5e6c0;
+            --dk:#1a1208; --dk2:#2b1d0e; --bd:#3d2e14; --mu:#7a6444;
+            --wh:#ffffff; --of:#faf7f2; --of2:#f4ede0; --br:#e8dfc9;
+        }
+        .lp{font-family:'Jost',sans-serif;overflow-x:hidden;}
+        .lp *{box-sizing:border-box;}
+
+        /* ── Containers ── */
+        .wi{max-width:1280px;margin:0 auto;padding:0 52px;}
+
+        /* ── Tag label ── */
+        .tag{display:inline-flex;align-items:center;gap:10px;font-size:.63rem;letter-spacing:5px;text-transform:uppercase;color:var(--g);font-weight:700;margin-bottom:16px;}
+        .tag::before{content:'';width:28px;height:2px;background:linear-gradient(90deg,var(--gd),var(--gl));border-radius:2px;}
+        .tag.light{color:var(--gl);}
+        .tag.light::before{background:linear-gradient(90deg,var(--gl),rgba(255,255,255,.3));}
+
+        /* ── Section Head ── */
+        .sh{text-align:center;margin-bottom:56px;}
+        .sh-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.35rem;color:var(--g);margin-bottom:8px;}
+        .sh-ttl{font-family:'Cinzel',serif;font-size:clamp(1.6rem,2.6vw,2.3rem);font-weight:700;color:var(--dk);text-transform:uppercase;letter-spacing:2px;}
+        .sh-ttl.light{color:#fff;}
+        .sh-rule{width:56px;height:3px;margin:14px auto 0;background:linear-gradient(90deg,var(--gd),var(--g),var(--gl));border-radius:2px;}
+        .sh-sub.light{color:var(--gl);}
+
+        /* ── Buttons ── */
+        .btn-g{display:inline-flex;align-items:center;gap:9px;padding:14px 32px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;border-radius:6px;text-decoration:none;font-weight:700;font-size:.88rem;font-family:'Jost',sans-serif;transition:.28s;box-shadow:0 5px 22px rgba(200,132,31,.38);letter-spacing:.3px;cursor:pointer;}
+        .btn-g:hover{background:linear-gradient(135deg,var(--g),var(--gl));color:#fff;transform:translateY(-2px);box-shadow:0 8px 32px rgba(200,132,31,.50);}
+        .btn-o{display:inline-flex;align-items:center;gap:9px;padding:13px 30px;background:transparent;color:var(--g);border:2px solid var(--g);border-radius:6px;text-decoration:none;font-weight:700;font-size:.88rem;font-family:'Jost',sans-serif;transition:.28s;letter-spacing:.3px;}
+        .btn-o:hover{background:var(--g);color:#fff;box-shadow:0 5px 22px rgba(200,132,31,.38);}
+        .btn-dk{display:inline-flex;align-items:center;gap:9px;padding:14px 32px;background:var(--dk);color:#fff;border:2px solid var(--dk);border-radius:6px;text-decoration:none;font-weight:700;font-size:.88rem;font-family:'Jost',sans-serif;transition:.28s;box-shadow:0 5px 18px rgba(0,0,0,.25);}
+        .btn-dk:hover{background:var(--g);border-color:var(--g);color:#fff;transform:translateY(-2px);}
+        .btn-wh{display:inline-flex;align-items:center;gap:9px;padding:14px 36px;background:#fff;color:var(--g);border:none;border-radius:6px;text-decoration:none;font-weight:700;font-size:.9rem;font-family:'Jost',sans-serif;transition:.28s;box-shadow:0 6px 26px rgba(0,0,0,.22);}
+        .btn-wh:hover{background:var(--dk);color:var(--gl);transform:translateY(-2px);}
+
+        /* ════════════════════════════════════════
+           HERO — Split layout with decorative SVG
+        ════════════════════════════════════════ */
+        .hero{
+            background:var(--wh);
+            padding:80px 0 70px;
+            position:relative;
+            overflow:hidden;
+        }
+        /* Decorative background dot grid */
+        .hero::before{
+            content:'';position:absolute;
+            top:0;right:0;width:55%;height:100%;
+            background:
+                    radial-gradient(circle,rgba(200,132,31,.06) 1px,transparent 1px);
+            background-size:28px 28px;
+            pointer-events:none;
+        }
+        /* Gold top-right arc */
+        .hero::after{
+            content:'';position:absolute;
+            top:-120px;right:-120px;
+            width:500px;height:500px;
+            border-radius:50%;
+            border:1px solid rgba(200,132,31,.10);
+            pointer-events:none;
+        }
+        .hero .wi{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:80px;position:relative;z-index:1;}
+
+        /* Text side */
+        .hero-eyebrow{
+            display:inline-flex;align-items:center;gap:8px;
+            background:var(--gp);border:1px solid var(--gpp);
+            border-radius:50px;padding:6px 16px;
+            font-size:.68rem;letter-spacing:3px;text-transform:uppercase;
+            color:var(--g);font-weight:700;margin-bottom:24px;
+        }
+        .hero-eyebrow i{font-size:.8rem;}
+        .hero-h1{
+            font-family:'Cinzel',serif;
+            font-size:clamp(2.6rem,4.2vw,4rem);
+            font-weight:700;color:var(--dk);
+            line-height:1.1;letter-spacing:.5px;
+            margin-bottom:24px;
+        }
+        .hero-h1 .accent{color:var(--g);display:block;}
+        .hero-h1 .thin{font-weight:400;color:var(--mu);}
+        .hero-desc{font-size:1.05rem;color:var(--bd);line-height:1.9;margin-bottom:36px;max-width:480px;}
+        .hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:48px;}
+        .hero-stats{display:flex;gap:40px;padding-top:30px;border-top:1.5px solid var(--br);}
+        .hs-n{font-family:'Cinzel',serif;font-size:2.4rem;font-weight:700;color:var(--g);line-height:1;}
+        .hs-l{font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-top:6px;}
+
+        /* Image side */
+        .hero-vis{position:relative;}
+        .hero-img-frame{
+            position:relative;
+            border-radius:20px;
+            overflow:hidden;
+            box-shadow:0 32px 80px rgba(26,18,8,.22);
+        }
+        .hero-img-frame img{
+            width:100%;height:560px;
+            object-fit:cover;display:block;
+        }
+        /* Decorative gold border frame */
+        .hero-img-frame::before{
+            content:'';position:absolute;
+            inset:12px;border:1.5px solid rgba(200,132,31,.35);
+            border-radius:12px;z-index:2;pointer-events:none;
+        }
+        /* Corner accent top-left */
+        .hero-img-frame::after{
+            content:'';position:absolute;
+            top:0;left:0;width:80px;height:80px;
+            border-top:4px solid var(--g);
+            border-left:4px solid var(--g);
+            border-radius:20px 0 0 0;
+            z-index:3;pointer-events:none;
+        }
+        /* Corner accent bottom-right */
+        .corner-br{
+            position:absolute;bottom:0;right:0;
+            width:80px;height:80px;
+            border-bottom:4px solid var(--g);
+            border-right:4px solid var(--g);
+            border-radius:0 0 20px 0;
+            z-index:3;pointer-events:none;
+        }
+        /* Floating cards */
+        .fc1{
+            position:absolute;bottom:36px;left:-32px;z-index:5;
+            background:#fff;border-radius:16px;
+            padding:16px 20px;
+            box-shadow:0 12px 40px rgba(0,0,0,.18);
+            display:flex;align-items:center;gap:14px;
+            border-left:4px solid var(--g);
+            min-width:220px;
+        }
+        .fc1-ic{width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,var(--gd),var(--g));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;flex-shrink:0;}
+        .fc1-lb{font-size:.63rem;color:var(--mu);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px;}
+        .fc1-vl{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--dk);}
+        .fc2{
+            position:absolute;top:36px;right:-28px;z-index:5;
+            background:linear-gradient(135deg,var(--gd),var(--g));
+            border-radius:16px;padding:16px 22px;
+            box-shadow:0 12px 40px rgba(200,132,31,.40);
+            display:flex;align-items:center;gap:14px;
+        }
+        .fc2-ic{font-size:1.6rem;color:#fff;opacity:.9;}
+        .fc2-lb{font-size:.63rem;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px;}
+        .fc2-vl{font-family:'Cinzel',serif;font-size:1.05rem;font-weight:700;color:#fff;}
+        /* Decorative orb behind image */
+        .hero-orb{
+            position:absolute;
+            top:-40px;right:-40px;
+            width:300px;height:300px;
+            border-radius:50%;
+            background:radial-gradient(circle,rgba(200,132,31,.12),transparent 70%);
+            z-index:0;
+        }
+
+        /* ════════════════════════════════════════
+           FEATURE STRIP
+        ════════════════════════════════════════ */
+        .fstrip{background:var(--dk);padding:0;border:none;position:relative;overflow:hidden;}
+        .fstrip::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gd),var(--g),var(--gl),var(--g),var(--gd));}
+        .fstrip .wi{display:grid;grid-template-columns:repeat(4,1fr);}
+        .fi{display:flex;align-items:center;gap:16px;padding:24px 32px;border-right:1px solid rgba(255,255,255,.06);transition:.3s;cursor:default;}
+        .fi:last-child{border-right:none;}
+        .fi:hover{background:rgba(200,132,31,.06);}
+        .fi-ic{width:48px;height:48px;border-radius:12px;background:rgba(200,132,31,.15);border:1px solid rgba(200,132,31,.25);display:flex;align-items:center;justify-content:center;color:var(--gl);font-size:1.2rem;flex-shrink:0;transition:.3s;}
+        .fi:hover .fi-ic{background:rgba(200,132,31,.25);}
+        .fi-t{font-size:.9rem;font-weight:600;color:#fff;margin-bottom:3px;}
+        .fi-s{font-size:.76rem;color:rgba(255,255,255,.42);}
+
+        /* ════════════════════════════════════════
+           MARQUEE
+        ════════════════════════════════════════ */
+        .mq{background:var(--g);padding:14px 0;overflow:hidden;position:relative;}
+        .mq-row{display:flex;white-space:nowrap;animation:mqs 28s linear infinite;}
+        .mq-row:hover{animation-play-state:paused;}
+        .mq-i{display:inline-flex;align-items:center;gap:12px;padding:0 40px;font-size:.7rem;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.85);font-weight:700;}
+        .mq-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);flex-shrink:0;}
+        @keyframes mqs{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+        /* ════════════════════════════════════════
+           CATEGORIES — Full photo cards
+        ════════════════════════════════════════ */
+        .cats{padding:96px 0;background:var(--wh);position:relative;}
+        /* Decorative side lines */
+        .cats::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:160px;background:linear-gradient(180deg,transparent,var(--g),transparent);border-radius:2px;}
+        .cg{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+        .cc{position:relative;border-radius:14px;overflow:hidden;height:330px;display:block;text-decoration:none;box-shadow:0 6px 28px rgba(0,0,0,.13);}
+        .cc img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s ease;}
+        .cc:hover img{transform:scale(1.08);}
+        /* Gradient overlay */
+        .co{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 20%,rgba(10,5,0,.85) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:26px 22px;transition:.3s;}
+        .cc:hover .co{background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(10,5,0,.92) 100%);}
+        /* Gold top tag */
+        .cc-tag{position:absolute;top:14px;left:14px;background:var(--g);color:#fff;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:5px 12px;border-radius:4px;}
+        .cn{font-family:'Cinzel',serif;font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:.8px;margin-bottom:6px;}
+        .cs{font-size:.72rem;color:var(--gl);letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:6px;opacity:0;transform:translateY(8px);transition:.35s;}
+        .cc:hover .cs{opacity:1;transform:translateY(0);}
+        /* Gold bottom border on hover */
+        .cc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--g);transform:scaleX(0);transition:transform .4s;transform-origin:left;}
+        .cc:hover::after{transform:scaleX(1);}
+
+        /* ════════════════════════════════════════
+           PRODUCTS GRID
+        ════════════════════════════════════════ */
+        .prods{padding:96px 0;background:var(--of);position:relative;overflow:hidden;}
+        /* Decorative pattern */
+        .prods::before{
+            content:'';position:absolute;right:-60px;top:-60px;
+            width:320px;height:320px;
+            border-radius:50%;
+            border:60px solid rgba(200,132,31,.04);
+            pointer-events:none;
+        }
+        .pg{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;}
+        .pc{background:var(--wh);border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);transition:.35s;border:1px solid var(--br);}
+        .pc:hover{transform:translateY(-8px);box-shadow:0 20px 50px rgba(0,0,0,.14);border-color:rgba(200,132,31,.2);}
+        .pc-iw{position:relative;overflow:hidden;}
+        .pc-img{width:100%;height:220px;object-fit:cover;display:block;transition:transform .55s;}
+        .pc:hover .pc-img{transform:scale(1.07);}
+        .pc-bdg{position:absolute;top:12px;left:12px;background:linear-gradient(135deg,#1a8a4a,#27ae60);color:#fff;font-size:.64rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 11px;border-radius:4px;}
+        .pc-bd{padding:20px 18px 18px;}
+        .pc-brand{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--g);font-weight:700;margin-bottom:4px;}
+        .pc-n{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;color:var(--dk);margin-bottom:6px;}
+        .pc-sz{font-size:.78rem;color:var(--mu);margin-bottom:12px;display:flex;align-items:center;gap:5px;}
+        .pc-p{font-size:1.2rem;font-weight:700;color:var(--dk);margin-bottom:16px;font-family:'Cinzel',serif;}
+        .pc-p span{font-size:.8rem;font-weight:500;color:var(--mu);font-family:'Jost',sans-serif;margin-right:2px;}
+        .pc-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:linear-gradient(135deg,var(--gd),var(--g));color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:.86rem;font-weight:600;font-family:'Jost',sans-serif;text-decoration:none;transition:.25s;letter-spacing:.3px;}
+        .pc-add:hover{background:linear-gradient(135deg,var(--g),var(--gl));color:#fff;box-shadow:0 4px 16px rgba(200,132,31,.38);}
+
+        /* ════════════════════════════════════════
+           ABOUT — Split with photo bg + decorative
+        ════════════════════════════════════════ */
+        .about{display:grid;grid-template-columns:1fr 1fr;min-height:560px;}
+        .ab-img{position:relative;overflow:hidden;}
+        .ab-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1s;}
+        .ab-img:hover img{transform:scale(1.04);}
+        /* Dark overlay on about image */
+        .ab-img-ov{position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,18,8,.55) 0%,rgba(26,18,8,.15) 100%);}
+        /* EST badge */
+        .ab-badge{
+            position:absolute;top:40px;left:40px;
+            background:rgba(200,132,31,.92);
+            border-radius:14px;padding:20px 26px;
+            color:#fff;text-align:center;
+            backdrop-filter:blur(8px);
+            border:1px solid rgba(255,255,255,.2);
+        }
+        .ab-badge .num{font-family:'Cinzel',serif;font-size:2.4rem;font-weight:700;line-height:1;}
+        .ab-badge .lbl{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;opacity:.85;margin-top:4px;}
+        /* Bottom image credit strip */
+        .ab-img-strip{position:absolute;bottom:0;left:0;right:0;padding:20px 28px;background:linear-gradient(transparent,rgba(26,18,8,.7));display:flex;align-items:center;gap:10px;}
+        .ab-img-strip i{color:var(--gl);font-size:1.1rem;}
+        .ab-img-strip span{font-size:.78rem;color:rgba(255,255,255,.7);font-style:italic;}
+
+        .ab-txt{
+            padding:72px 68px;
+            background:var(--wh);
+            display:flex;flex-direction:column;justify-content:center;
+            position:relative;overflow:hidden;
+        }
+        /* Decorative circle in bg */
+        .ab-txt::before{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;border:1px solid rgba(200,132,31,.08);pointer-events:none;}
+        .ab-txt::after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;border:1px solid rgba(200,132,31,.12);pointer-events:none;}
+        .ab-h{font-family:'Cinzel',serif;font-size:2.1rem;font-weight:700;color:var(--dk);margin-bottom:20px;line-height:1.2;position:relative;}
+        .ab-p{font-size:.98rem;color:var(--bd);line-height:1.9;margin-bottom:14px;position:relative;}
+        .ab-checks{display:flex;flex-direction:column;gap:11px;margin:20px 0 32px;position:relative;}
+        .ab-ck{display:flex;align-items:flex-start;gap:11px;font-size:.9rem;color:var(--bd);}
+        .ab-ck-ic{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--gd),var(--g));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;flex-shrink:0;margin-top:1px;}
+
+        /* ════════════════════════════════════════
+           SPICE DESCRIPTIONS (What Is X?)
+        ════════════════════════════════════════ */
+        .spdesc{padding:96px 0;background:var(--of2);position:relative;}
+        /* Decorative top wave */
+        .spdesc::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:4px;
+            background:linear-gradient(90deg,transparent,var(--gd),var(--g),var(--gl),var(--g),var(--gd),transparent);
+        }
+        .sd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;}
+        .sdc{
+            background:var(--wh);border-radius:16px;overflow:hidden;
+            box-shadow:0 4px 22px rgba(0,0,0,.07);
+            transition:.35s;border:1px solid var(--br);
+            display:flex;flex-direction:column;
+        }
+        .sdc:hover{transform:translateY(-7px);box-shadow:0 18px 50px rgba(0,0,0,.13);border-color:rgba(200,132,31,.22);}
+        .sdc-img-wrap{position:relative;overflow:hidden;}
+        .sdc-img{width:100%;height:220px;object-fit:cover;display:block;transition:transform .55s;}
+        .sdc:hover .sdc-img{transform:scale(1.06);}
+        /* Gold ribbon */
+        .sdc-ribbon{
+            position:absolute;top:0;right:0;
+            background:linear-gradient(135deg,var(--gd),var(--g));
+            color:#fff;font-size:.6rem;font-weight:700;
+            letter-spacing:1.5px;text-transform:uppercase;
+            padding:6px 14px;
+            clip-path:polygon(0 0,100% 0,100% 100%,8px 100%);
+        }
+        .sdc-bd{padding:24px 24px 22px;flex:1;display:flex;flex-direction:column;}
+        .sdc-sub{font-size:.63rem;letter-spacing:3.5px;text-transform:uppercase;color:var(--g);font-weight:700;margin-bottom:8px;}
+        .sdc-ttl{font-family:'Cinzel',serif;font-size:1.08rem;font-weight:700;color:var(--dk);margin-bottom:13px;line-height:1.3;}
+        .sdc-txt{font-size:.88rem;color:var(--bd);line-height:1.85;margin-bottom:18px;flex:1;}
+        /* Tags inside description card */
+        .sdc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+        .sdc-tag{background:var(--gp);color:var(--g);border:1px solid var(--gpp);border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:600;}
+        .sdc-more{
+            display:inline-flex;align-items:center;gap:7px;
+            font-size:.77rem;font-weight:700;color:var(--g);
+            text-decoration:none;letter-spacing:.5px;text-transform:uppercase;
+            border-top:1px solid var(--br);padding-top:14px;margin-top:auto;
+            transition:.2s;
+        }
+        .sdc-more i{transition:.2s;}
+        .sdc-more:hover{color:var(--gd);}
+        .sdc-more:hover i{transform:translateX(4px);}
+
+        /* ════════════════════════════════════════
+           SPLIT SECTIONS
+        ════════════════════════════════════════ */
+        .split{padding:96px 0;background:var(--wh);position:relative;}
+        .split.alt{background:var(--of);}
+        .split .wi{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+        .split.alt .wi{direction:rtl;}
+        .split.alt .wi>*{direction:ltr;}
+        .sp-img{border-radius:16px;overflow:hidden;box-shadow:0 22px 60px rgba(0,0,0,.16);position:relative;}
+        .sp-img img{width:100%;height:440px;object-fit:cover;display:block;transition:transform .65s;}
+        .sp-img:hover img{transform:scale(1.04);}
+        /* Corner accents on split images */
+        .sp-img::before{content:'';position:absolute;top:0;left:0;width:60px;height:60px;border-top:3px solid var(--g);border-left:3px solid var(--g);border-radius:16px 0 0 0;z-index:2;}
+        .sp-img::after{content:'';position:absolute;bottom:0;right:0;width:60px;height:60px;border-bottom:3px solid var(--g);border-right:3px solid var(--g);border-radius:0 0 16px 0;z-index:2;}
+        .sp-h{font-family:'Cinzel',serif;font-size:1.85rem;font-weight:700;color:var(--dk);margin-bottom:20px;line-height:1.25;}
+        .sp-p{font-size:.97rem;color:var(--bd);line-height:1.9;margin-bottom:14px;}
+        .sp-tags{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 28px;}
+        .sp-tag{background:var(--gp);color:var(--g);border:1px solid var(--gpp);border-radius:20px;padding:6px 15px;font-size:.76rem;font-weight:600;}
+
+        /* ════════════════════════════════════════
+           WHY US — Dark with graphic elements
+        ════════════════════════════════════════ */
+        .why{
+            padding:96px 0;
+            background:var(--dk);
+            position:relative;overflow:hidden;
+        }
+        /* Decorative hex grid pattern */
+        .why::before{
+            content:'';position:absolute;inset:0;
+            background-image:
+                    radial-gradient(circle 1px at 50px 50px,rgba(200,132,31,.12) 0%,transparent 100%),
+                    radial-gradient(circle 1px at 150px 100px,rgba(200,132,31,.08) 0%,transparent 100%),
+                    radial-gradient(circle 1px at 250px 50px,rgba(200,132,31,.12) 0%,transparent 100%);
+            background-size:200px 150px;
+            pointer-events:none;
+        }
+        /* Gold top line */
+        .why::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gd),var(--g),var(--gl),var(--g),var(--gd),transparent);}
+        .wg{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+        .wc{
+            padding:36px 26px;text-align:center;
+            border:1px solid rgba(200,132,31,.12);
+            border-radius:14px;transition:.35s;
+            position:relative;overflow:hidden;
+        }
+        .wc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);transform:scaleX(0);transition:transform .4s;transform-origin:center;}
+        .wc:hover{border-color:rgba(200,132,31,.38);background:rgba(255,255,255,.03);}
+        .wc:hover::before{transform:scaleX(1);}
+        .wi-ic{
+            width:68px;height:68px;border-radius:50%;
+            background:rgba(200,132,31,.10);
+            border:1px solid rgba(200,132,31,.22);
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto 20px;font-size:1.55rem;color:var(--gl);
+            transition:.3s;
+        }
+        .wc:hover .wi-ic{background:rgba(200,132,31,.20);border-color:rgba(200,132,31,.45);transform:scale(1.08);}
+        .wc-t{font-family:'Cinzel',serif;font-size:.95rem;font-weight:700;color:#fff;margin-bottom:12px;letter-spacing:.5px;}
+        .wc-b{font-size:.85rem;color:rgba(255,255,255,.42);line-height:1.75;}
+
+        /* ════════════════════════════════════════
+           CTA — Full premium banner
+        ════════════════════════════════════════ */
+        .cta{
+            padding:96px 52px;
+            background:linear-gradient(135deg,var(--gd) 0%,var(--g) 45%,#d4922a 70%,var(--gl) 100%);
+            text-align:center;position:relative;overflow:hidden;
+        }
+        /* Decorative circles */
+        .cta::before{content:'';position:absolute;left:-100px;top:-100px;width:400px;height:400px;border-radius:50%;border:1px solid rgba(255,255,255,.10);pointer-events:none;}
+        .cta::after{content:'';position:absolute;right:-80px;bottom:-80px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(255,255,255,.10);pointer-events:none;}
+        /* Dot grid */
+        .cta-dots{position:absolute;inset:0;background-image:radial-gradient(circle 1.5px at 0 0,rgba(255,255,255,.10) 0%,transparent 100%);background-size:36px 36px;pointer-events:none;}
+        .cta-t{font-family:'Cinzel',serif;font-size:clamp(1.9rem,3.2vw,3rem);font-weight:700;color:#fff;margin-bottom:14px;letter-spacing:1px;position:relative;}
+        .cta-s{font-size:1.08rem;color:rgba(255,255,255,.82);margin-bottom:36px;position:relative;line-height:1.7;}
+        .cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;}
+
+        /* ════════════════════════════════════════
+           RESPONSIVE
+        ════════════════════════════════════════ */
+        @media(max-width:1100px){
+            .pg{grid-template-columns:repeat(3,1fr);}
+            .cg{grid-template-columns:repeat(2,1fr);}
+            .sd-grid{grid-template-columns:1fr 1fr;}
+            .wg{grid-template-columns:1fr 1fr;}
+            .fstrip .wi{grid-template-columns:1fr 1fr;}
+        }
+        @media(max-width:900px){
+            .hero .wi{grid-template-columns:1fr;gap:48px;padding:0 24px;}
+            .hero-h1,.hero-desc{text-align:center;}
+            .hero-desc{margin:0 auto 28px;}
+            .hero-btns,.hero-stats{justify-content:center;}
+            .fc1,.fc2{display:none;}
+            .hero-img-frame img{height:340px;}
+            .about{grid-template-columns:1fr;}
+            .ab-img{min-height:320px;max-height:400px;}
+            .ab-txt{padding:52px 36px;}
+            .split .wi{grid-template-columns:1fr;gap:40px;direction:ltr!important;}
+            .sp-img img{height:300px;}
+        }
+        @media(max-width:700px){
+            .cg,.sd-grid{grid-template-columns:1fr 1fr;}
+            .pg{grid-template-columns:1fr 1fr;}
+            .wg{grid-template-columns:1fr;}
+            .wi{padding:0 22px;}
+            .fstrip .wi{grid-template-columns:1fr;}
+            .fi{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+        }
+        @media(max-width:480px){
+            .pg,.cg,.sd-grid{grid-template-columns:1fr;}
+        }
+    </style>
+
+    <div class="lp">
+
+        <!-- ════════════════════════════════════════
+             HERO
+        ════════════════════════════════════════ -->
+        <section class="hero">
+            <div class="wi">
+
+                <!-- Left: Text -->
+                <div>
+                    <div class="hero-eyebrow">
+                        <i class="bi bi-gem"></i>
+                        Sri Lanka's Premium Spice Distributor Since 1995
+                    </div>
+                    <h1 class="hero-h1">
+                        <span class="thin">All Premium</span>
+                        Spices At
+                        <span class="accent">One Place</span>
+                    </h1>
+                    <p class="hero-desc">
+                        Golden Dissanayaka Distributors brings you the finest authentic
+                        Sri Lankan spices — chilli powder, curry powder, pepper, turmeric
+                        and more. Pure quality, guaranteed best prices, island-wide delivery.
+                    </p>
+                    <div class="hero-btns">
+                        <a th:href="@{/products}" class="btn-g">
+                            <i class="bi bi-grid-3x3-gap"></i>Shop Products
+                        </a>
+                        <a th:href="@{/wholesale}" class="btn-o">
+                            <i class="bi bi-box-seam"></i>Wholesale Enquiry
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div><div class="hs-n">1995</div><div class="hs-l">Established</div></div>
+                        <div><div class="hs-n">16+</div><div class="hs-l">Spice Products</div></div>
+                        <div><div class="hs-n">100%</div><div class="hs-l">Pure Quality</div></div>
+                    </div>
+                </div>
+
+                <!-- Right: Visual -->
+                <div class="hero-vis">
+                    <div class="hero-orb"></div>
+                    <div class="hero-img-frame">
+                        <!-- Vibrant spice market flat-lay — colourful spice bowls -->
+                        <img src="https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=700&q=90&fit=crop&crop=center"
+                             alt="Premium Sri Lankan Spice Collection"
+                             onerror="this.src='https://images.unsplash.com/photo-1585032226651-759b368d7246?w=700&q=90&fit=crop&crop=center'">
+                        <div class="corner-br"></div>
+                    </div>
+                    <div class="fc1">
+                        <div class="fc1-ic"><i class="bi bi-shield-check"></i></div>
+                        <div>
+                            <div class="fc1-lb">Quality Promise</div>
+                            <div class="fc1-vl">100% Pure &amp; Natural</div>
+                        </div>
+                    </div>
+                    <div class="fc2">
+                        <div class="fc2-ic"><i class="bi bi-truck"></i></div>
+                        <div>
+                            <div class="fc2-lb">Delivery</div>
+                            <div class="fc2-vl">All Sri Lanka</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             FEATURE STRIP
+        ════════════════════════════════════════ -->
+        <div class="fstrip">
+            <div class="wi">
+                <div class="fi">
+                    <div class="fi-ic"><i class="bi bi-award-fill"></i></div>
+                    <div><div class="fi-t">100% Pure Quality</div><div class="fi-s">No artificial additives or fillers</div></div>
+                </div>
+                <div class="fi">
+                    <div class="fi-ic"><i class="bi bi-truck"></i></div>
+                    <div><div class="fi-t">Island-Wide Delivery</div><div class="fi-s">Fast shipping everywhere in Sri Lanka</div></div>
+                </div>
+                <div class="fi">
+                    <div class="fi-ic"><i class="bi bi-box-seam"></i></div>
+                    <div><div class="fi-t">Wholesale Available</div><div class="fi-s">Bulk orders with special pricing</div></div>
+                </div>
+                <div class="fi">
+                    <div class="fi-ic"><i class="bi bi-telephone-fill"></i></div>
+                    <div><div class="fi-t">Direct Support</div><div class="fi-s">077 780 8259 / 071 857 9984</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             MARQUEE
+        ════════════════════════════════════════ -->
+        <div class="mq">
+            <div class="mq-row">
+    <span th:each="i : ${#numbers.sequence(1,4)}">
+      <span class="mq-i"><span class="mq-dot"></span>Chilli Pieces</span>
+      <span class="mq-i"><span class="mq-dot"></span>Chilli Powder</span>
+      <span class="mq-i"><span class="mq-dot"></span>Curry Powder</span>
+      <span class="mq-i"><span class="mq-dot"></span>Roasted Curry Powder</span>
+      <span class="mq-i"><span class="mq-dot"></span>Turmeric Powder</span>
+      <span class="mq-i"><span class="mq-dot"></span>Pepper Powder</span>
+      <span class="mq-i"><span class="mq-dot"></span>Meat Curry Mix</span>
+      <span class="mq-i"><span class="mq-dot"></span>Fish Curry Mix</span>
+    </span>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             SHOP BY CATEGORY — Your Own Images
+        ════════════════════════════════════════ -->
+        <section class="cats">
+            <div class="wi">
+                <div class="sh">
+                    <div class="sh-sub">Browse Our Range</div>
+                    <div class="sh-ttl">Shop By Category</div>
+                    <div class="sh-rule"></div>
+                </div>
+                <div class="cg">
+                    <a th:href="@{/products}" class="cc">
+                        <img src="/images/products/chilli-powder.png.jpg"
+                             alt="Chilli Powder"
+                             onerror="this.src='https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=400&q=80'">
+                        <div class="cc-tag">Hot &amp; Spicy</div>
+                        <div class="co">
+                            <div class="cn">Chilli Powder &amp; Pieces</div>
+                            <div class="cs">Shop Now <i class="bi bi-arrow-right"></i></div>
+                        </div>
+                    </a>
+                    <a th:href="@{/products}" class="cc">
+                        <img src="/images/products/curry-powder.png.jpg"
+                             alt="Curry Powder"
+                             onerror="this.src='https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=400&q=80'">
+                        <div class="cc-tag">Traditional Blend</div>
+                        <div class="co">
+                            <div class="cn">Curry Powder</div>
+                            <div class="cs">Shop Now <i class="bi bi-arrow-right"></i></div>
+                        </div>
+                    </a>
+                    <a th:href="@{/products}" class="cc">
+                        <img src="/images/products/roasted-curry-powder.png.jpg"
+                             alt="Roasted Curry Powder"
+                             onerror="this.src='https://images.unsplash.com/photo-1505253468034-514d2507d914?w=400&q=80'">
+                        <div class="cc-tag">Deep Flavour</div>
+                        <div class="co">
+                            <div class="cn">Roasted Curry Powder</div>
+                            <div class="cs">Shop Now <i class="bi bi-arrow-right"></i></div>
+                        </div>
+                    </a>
+                    <a th:href="@{/products}" class="cc">
+                        <img src="/images/products/pepper-powder.png.jpg"
+                             alt="Pepper Powder"
+                             onerror="this.src='https://images.unsplash.com/photo-1514190051997-0f6f39ca5cde?w=400&q=80'">
+                        <div class="cc-tag">Ceylon Premium</div>
+                        <div class="co">
+                            <div class="cn">Pepper &amp; Spice Mixes</div>
+                            <div class="cs">Shop Now <i class="bi bi-arrow-right"></i></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             FEATURED PRODUCTS
+        ════════════════════════════════════════ -->
+        <section class="prods">
+            <div class="wi">
+                <div class="sh">
+                    <div class="sh-sub">See Our Latest</div>
+                    <div class="sh-ttl">Featured Products</div>
+                    <div class="sh-rule"></div>
+                </div>
+                <div class="pg" th:if="${products != null and !#lists.isEmpty(products)}">
+                    <div class="pc" th:each="p,st : ${products}" th:if="${st.index < 8}">
+                        <div class="pc-iw">
+                            <img class="pc-img"
+                                 th:src="${p.imageUrl != null and !p.imageUrl.isBlank()}
+                       ? (${p.imageUrl.startsWith('/images')} ? ${p.imageUrl} : '/images/products/' + ${p.imageUrl})
+                       : '/images/products/default-product.png'"
+                                 th:alt="${p.name}">
+                            <span class="pc-bdg" th:if="${p.stockQty != null and p.stockQty > 0}">In Stock</span>
+                        </div>
+                        <div class="pc-bd">
+                            <div class="pc-brand" th:text="${p.brand}">GOLDEN</div>
+                            <div class="pc-n" th:text="${p.name}">Product Name</div>
+                            <div class="pc-sz"><i class="bi bi-box"></i><span th:text="${p.sizeLabel}">1kg</span></div>
+                            <div class="pc-p">
+                                <span>LKR</span>
+                                <span th:text="${#numbers.formatDecimal(p.priceLkr,1,'COMMA',2,'POINT')}">0.00</span>
+                            </div>
+                            <form th:action="@{/cart/add}" method="post">
+                                <input type="hidden" name="productId" th:value="${p.id}">
+                                <input type="hidden" name="qty" value="1">
+                                <button type="submit" class="pc-add">
+                                    <i class="bi bi-cart-plus"></i>Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-5">
+                    <a th:href="@{/products}" class="btn-g">
+                        <i class="bi bi-grid-3x3-gap"></i>View All Products
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             ABOUT US
+        ════════════════════════════════════════ -->
+        <section class="about">
+            <div class="ab-img">
+                <!-- Warm colourful spice bowls arranged on table -->
+                <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&q=90&fit=crop&crop=center"
+                     alt="About Golden Dissanayaka Distributors"
+                     onerror="this.src='https://images.unsplash.com/photo-1532336414038-cf19250c5757?w=800&q=90'">
+                <div class="ab-img-ov"></div>
+                <div class="ab-badge">
+                    <div class="num">1995</div>
+                    <div class="lbl">Est. Since</div>
+                </div>
+                <div class="ab-img-strip">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>96B/2, Old Kesbewa Road, Nugegoda, Sri Lanka</span>
+                </div>
+            </div>
+            <div class="ab-txt">
+                <div class="tag">Who We Are</div>
+                <h2 class="ab-h">About Us</h2>
+                <p class="ab-p">
+                    Golden Dissanayaka Distributors is one of Sri Lanka's most trusted spice
+                    distributors, operating from Nugegoda since 1995. We are deeply passionate
+                    about supplying high-quality, pure, authentic Sri Lankan spices to homes
+                    and businesses across the island.
+                </p>
+                <p class="ab-p">
+                    Whether you need retail packs or bulk wholesale quantities, we carry all
+                    your spice requirements at the best prices with fast, reliable island-wide
+                    delivery guaranteed.
+                </p>
+                <div class="ab-checks">
+                    <div class="ab-ck">
+                        <div class="ab-ck-ic"><i class="bi bi-check"></i></div>
+                        100% pure — no artificial additives or fillers
+                    </div>
+                    <div class="ab-ck">
+                        <div class="ab-ck-ic"><i class="bi bi-check"></i></div>
+                        30+ years of trusted Sri Lankan spice expertise
+                    </div>
+                    <div class="ab-ck">
+                        <div class="ab-ck-ic"><i class="bi bi-check"></i></div>
+                        Retail and bulk wholesale orders accepted
+                    </div>
+                    <div class="ab-ck">
+                        <div class="ab-ck-ic"><i class="bi bi-check"></i></div>
+                        Fast island-wide delivery across all Sri Lanka
+                    </div>
+                </div>
+                <a th:href="@{/products}" class="btn-dk">
+                    Shop Our Products <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             SPICE DESCRIPTION CARDS (What Is X?)
+        ════════════════════════════════════════ -->
+        <section class="spdesc">
+            <div class="wi">
+                <div class="sh">
+                    <div class="sh-sub">We Provide the Best Quality</div>
+                    <div class="sh-ttl">Best Quality Ceylon Raw Spices</div>
+                    <div class="sh-rule"></div>
+                </div>
+                <div class="sd-grid">
+
+                    <div class="sdc">
+                        <div class="sdc-img-wrap">
+                            <img class="sdc-img" src="/images/products/chilli-pieces.png.jpg"
+                                 alt="Chilli Pieces"
+                                 onerror="this.src='https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=400&q=80'">
+                            <div class="sdc-ribbon">Sri Lankan</div>
+                        </div>
+                        <div class="sdc-bd">
+                            <div class="sdc-sub">What Is It?</div>
+                            <div class="sdc-ttl">Golden Chilli Pieces</div>
+                            <p class="sdc-txt">Our Chilli Pieces are premium sun-dried whole red chillies, carefully cleaned and cut. Rich in heat and authentic aroma — perfect for traditional Sri Lankan curries, sambols and pickles. Available in 250g and 1kg packs.</p>
+                            <div class="sdc-tags"><span class="sdc-tag">250g</span><span class="sdc-tag">1kg</span><span class="sdc-tag">Pure</span></div>
+                            <a th:href="@{/products}" class="sdc-more">Shop Now <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="sdc">
+                        <div class="sdc-img-wrap">
+                            <img class="sdc-img" src="/images/products/chilli-powder.png.jpg"
+                                 alt="Chilli Powder"
+                                 onerror="this.src='https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=400&q=80'">
+                            <div class="sdc-ribbon">Best Seller</div>
+                        </div>
+                        <div class="sdc-bd">
+                            <div class="sdc-sub">What Is It?</div>
+                            <div class="sdc-ttl">Golden Chilli Powder</div>
+                            <p class="sdc-txt">Precision-ground from the finest Sri Lankan red chillies. Delivers vibrant deep-red colour, authentic heat and rich flavour to every dish. No fillers, no artificial colour — 100% pure ground chilli powder.</p>
+                            <div class="sdc-tags"><span class="sdc-tag">250g</span><span class="sdc-tag">1kg</span><span class="sdc-tag">No Additives</span></div>
+                            <a th:href="@{/products}" class="sdc-more">Shop Now <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="sdc">
+                        <div class="sdc-img-wrap">
+                            <img class="sdc-img" src="/images/products/curry-powder.png.jpg"
+                                 alt="Curry Powder"
+                                 onerror="this.src='https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=400&q=80'">
+                            <div class="sdc-ribbon">Traditional</div>
+                        </div>
+                        <div class="sdc-bd">
+                            <div class="sdc-sub">What Is It?</div>
+                            <div class="sdc-ttl">Golden Curry Powder</div>
+                            <p class="sdc-txt">Crafted from a traditional Sri Lankan family recipe — a perfectly balanced blend of coriander, cumin, fennel, curry leaves and selected spices. The authentic taste of Sri Lankan home cooking in every pinch.</p>
+                            <div class="sdc-tags"><span class="sdc-tag">250g</span><span class="sdc-tag">1kg</span><span class="sdc-tag">Traditional</span></div>
+                            <a th:href="@{/products}" class="sdc-more">Shop Now <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="sdc">
+                        <div class="sdc-img-wrap">
+                            <img class="sdc-img" src="/images/products/roasted-curry-powder.png.jpg"
+                                 alt="Roasted Curry Powder"
+                                 onerror="this.src='https://images.unsplash.com/photo-1505253468034-514d2507d914?w=400&q=80'">
+                            <div class="sdc-ribbon">Rich Flavour</div>
+                        </div>
+                        <div class="sdc-bd">
+                            <div class="sdc-sub">What Is It?</div>
+                            <div class="sdc-ttl">Roasted Curry Powder</div>
+                            <p class="sdc-txt">Slowly dry-roasted over low heat to unlock a deeper, richer, more complex flavour. Our Roasted Curry Powder is perfect for authentic Sri Lankan black curries, meat dishes and special occasion cooking.</p>
+                            <div class="sdc-tags"><span class="sdc-tag">250g</span><span class="sdc-tag">1kg</span><span class="sdc-tag">Deep Roasted</span></div>
+                            <a th:href="@{/products}" class="sdc-more">Shop Now <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="sdc">
+                        <div class="sdc-img-wrap">
+                            <img class="sdc-img" src="/images/products/pepper-powder.png.jpg"
+                                 alt="Pepper Powder"
+                                 onerror="this.src='https://images.unsplash.com/photo-1514190051997-0f6f39ca5cde?w=400&q=80'">
+                            <div class="sdc-ribbon">Ceylon</div>
+                        </div>
+                        <div class="sdc-bd">
+                            <div class="sdc-sub">What Is It?</div>
+                            <div class="sdc-ttl">Golden Pepper Powder</div>
+                            <p class="sdc-txt">Ground from carefully selected premium black peppercorns. Ceylon black pepper is world-renowned for its intense aroma and sharp heat. Adds bold flavour to soups, marinades, meats and everyday cooking.</p>
+                            <div class="sdc-tags"><span class="sdc-tag">250g</span><span class="sdc-tag">1kg</span><span class="sdc-tag">Ceylon</span></div>
+                            <a th:href="@{/products}" class="sdc-more">Shop Now <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="sdc">
+                        <div class="sdc-img-wrap">
+                            <img class="sdc-img" src="/images/products/meat-curry-mix.png.jpg"
+                                 alt="Meat Curry Mix"
+                                 onerror="this.src='https://images.unsplash.com/photo-1603475239093-5c28b8e71a72?w=400&q=80'">
+                            <div class="sdc-ribbon">Special Blend</div>
+                        </div>
+                        <div class="sdc-bd">
+                            <div class="sdc-sub">What Is It?</div>
+                            <div class="sdc-ttl">Meat Curry Mix</div>
+                            <p class="sdc-txt">A specially formulated blend of spices designed to bring out the very best flavour in beef, chicken and pork curries. One pack delivers an authentic, restaurant-quality Sri Lankan meat curry every time.</p>
+                            <div class="sdc-tags"><span class="sdc-tag">250g</span><span class="sdc-tag">1kg</span><span class="sdc-tag">Special Mix</span></div>
+                            <a th:href="@{/products}" class="sdc-more">Shop Now <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             SPLIT 1 — Chilli Powder
+        ════════════════════════════════════════ -->
+        <section class="split alt">
+            <div class="wi">
+                <div>
+                    <div class="tag">What Is Our Chilli Powder?</div>
+                    <h2 class="sp-h">Premium Golden<br>Chilli Powder</h2>
+                    <p class="sp-p">Sri Lanka is famous for its fiery, flavourful red chillies. Our Golden Chilli Powder is precision-ground from the finest sun-dried red chillies, carefully selected from trusted Sri Lankan farms.</p>
+                    <p class="sp-p">It delivers a vibrant deep-red colour, authentic heat and rich flavour to every dish — from curries to sambols. No artificial colours, no preservatives. Just 100% pure natural chilli powder.</p>
+                    <div class="sp-tags">
+                        <span class="sp-tag">250g Pack</span>
+                        <span class="sp-tag">1kg Pack</span>
+                        <span class="sp-tag">100% Pure</span>
+                        <span class="sp-tag">No Additives</span>
+                        <span class="sp-tag">Island Delivery</span>
+                    </div>
+                    <a th:href="@{/products}" class="btn-g">Shop Chilli Powder <i class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="sp-img">
+                    <img src="/images/products/chilli-powder.png.jpg"
+                         alt="Golden Chilli Powder"
+                         onerror="this.src='https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=600&q=85'">
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             SPLIT 2 — Curry Powder
+        ════════════════════════════════════════ -->
+        <section class="split">
+            <div class="wi">
+                <div>
+                    <div class="tag">What Is Pure Curry Powder?</div>
+                    <h2 class="sp-h">Authentic Sri Lankan<br>Curry Powder</h2>
+                    <p class="sp-p">Sri Lanka is world-renowned for its aromatic curry powder blends. Our Golden Curry Powder is crafted from a traditional recipe — a perfectly balanced blend of coriander, cumin, fennel, curry leaves and carefully selected spices.</p>
+                    <p class="sp-p">We also offer Roasted Curry Powder with a deeper, richer, darker flavour — perfect for authentic Sri Lankan black curries and special occasion meat dishes.</p>
+                    <div class="sp-tags">
+                        <span class="sp-tag">Regular Curry</span>
+                        <span class="sp-tag">Roasted Curry</span>
+                        <span class="sp-tag">250g &amp; 1kg</span>
+                        <span class="sp-tag">Traditional Recipe</span>
+                    </div>
+                    <a th:href="@{/products}" class="btn-g">Shop Curry Powder <i class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="sp-img">
+                    <img src="/images/products/curry-powder.png.jpg"
+                         alt="Golden Curry Powder"
+                         onerror="this.src='https://images.unsplash.com/photo-1505253468034-514d2507d914?w=600&q=85'">
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             WHY CHOOSE US
+        ════════════════════════════════════════ -->
+        <section class="why">
+            <div class="wi">
+                <div class="sh">
+                    <div class="sh-sub light">Why Golden?</div>
+                    <div class="sh-ttl light">Why Choose Us</div>
+                    <div class="sh-rule"></div>
+                </div>
+                <div class="wg">
+                    <div class="wc">
+                        <div class="wi-ic"><i class="bi bi-award-fill"></i></div>
+                        <div class="wc-t">100% Pure Quality</div>
+                        <p class="wc-b">No artificial additives, colours or preservatives. Only hand-selected, finest Sri Lankan spices from trusted local farms and suppliers.</p>
+                    </div>
+                    <div class="wc">
+                        <div class="wi-ic"><i class="bi bi-truck"></i></div>
+                        <div class="wc-t">Island-Wide Delivery</div>
+                        <p class="wc-b">Fast and reliable delivery to every corner of Sri Lanka. Your authentic spices delivered fresh and safely to your doorstep.</p>
+                    </div>
+                    <div class="wc">
+                        <div class="wi-ic"><i class="bi bi-box-seam"></i></div>
+                        <div class="wc-t">Wholesale Available</div>
+                        <p class="wc-b">Special bulk pricing for restaurants, hotels, supermarkets and resellers. Contact us for competitive wholesale rates and volume discounts.</p>
+                    </div>
+                    <div class="wc">
+                        <div class="wi-ic"><i class="bi bi-clock-history"></i></div>
+                        <div class="wc-t">30+ Years Experience</div>
+                        <p class="wc-b">Established in 1995. Three decades of expertise in Sri Lankan spice distribution. A trusted name in thousands of Sri Lankan homes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
+             CTA BANNER
+        ════════════════════════════════════════ -->
+        <section class="cta">
+            <div class="cta-dots"></div>
+            <div class="cta-t">Ready to Order Premium Sri Lankan Spices?</div>
+            <p class="cta-s">
+                Browse our complete range of authentic, pure quality spices.<br>
+                Island-wide delivery available on all orders. Best prices guaranteed.
+            </p>
+            <div class="cta-btns">
+                <a th:href="@{/products}" class="btn-wh">
+                    <i class="bi bi-grid-3x3-gap"></i>Shop All Products
+                </a>
+                <a th:href="@{/wholesale}" class="btn-dk" style="border-color:rgba(255,255,255,.3);color:#fff;background:rgba(255,255,255,.12);">
+                    <i class="bi bi-box-seam"></i>Wholesale Enquiry
+                </a>
+            </div>
+        </section>
+
+    </div>
+</main>
+</html>

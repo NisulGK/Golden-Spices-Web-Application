@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Reports')}">
+
+<main>
+  <div class="container-fluid px-4 py-3">
+
+    <!-- ══════════ HEADER ══════════ -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 style="font-size:1.5rem;font-weight:600;margin:0;">
+        <i class="bi bi-bar-chart-line me-2" style="color:#c8841f;"></i>
+        Reports &amp; Analytics
+        <span class="text-muted" style="font-size:.9rem;font-weight:400;" th:text="'· ' + ${currentYear}"></span>
+      </h2>
+      <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Admin Dashboard
+      </a>
+    </div>
+
+    <!-- ══════════ STAT CARDS ══════════ -->
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-3">
+        <div class="rpt-card">
+          <div class="rpt-card-label">Total Revenue</div>
+          <div class="rpt-card-value" style="color:#c8841f;font-size:1.5rem;">
+            LKR <span th:text="${#numbers.formatDecimal(totalRevenue,0,2)}">0.00</span>
+          </div>
+          <div class="rpt-card-sub">All time</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="rpt-card">
+          <div class="rpt-card-label">Total Orders</div>
+          <div class="rpt-card-value" th:text="${totalOrders}">0</div>
+          <div class="rpt-card-sub">All time</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="rpt-card">
+          <div class="rpt-card-label">Avg. Order Value</div>
+          <div class="rpt-card-value" style="font-size:1.5rem;">
+            LKR <span th:text="${#numbers.formatDecimal(avgOrderValue,0,2)}">0.00</span>
+          </div>
+          <div class="rpt-card-sub">Per order</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="rpt-card">
+          <div class="rpt-card-label">Delivered</div>
+          <div class="rpt-card-value" style="color:#27ae60;" th:text="${deliveredCount}">0</div>
+          <div class="rpt-card-sub">Completed orders</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════ CHARTS ROW ══════════ -->
+    <div class="row g-4 mb-4">
+
+      <!-- Monthly Revenue Bar Chart -->
+      <div class="col-lg-8">
+        <div class="rpt-panel">
+          <div class="rpt-panel-header">
+            <span><i class="bi bi-bar-chart me-2"></i>Monthly Revenue</span>
+            <span class="text-muted" style="font-size:.78rem;" th:text="${currentYear}"></span>
+          </div>
+          <div class="p-3">
+            <canvas id="revenueChart" height="100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Status Doughnut -->
+      <div class="col-lg-4">
+        <div class="rpt-panel">
+          <div class="rpt-panel-header">
+            <span><i class="bi bi-pie-chart me-2"></i>Order Status</span>
+          </div>
+          <div class="p-3 d-flex flex-column align-items-center">
+            <canvas id="statusChart" height="200" style="max-width:200px;"></canvas>
+            <div class="mt-3 w-100">
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span style="font-size:.8rem;"><span class="rpt-dot" style="background:#f59e0b;"></span> Pending</span>
+                <strong th:text="${pendingCount}">0</strong>
+              </div>
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span style="font-size:.8rem;"><span class="rpt-dot" style="background:#3b82f6;"></span> Confirmed</span>
+                <strong th:text="${confirmedCount}">0</strong>
+              </div>
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span style="font-size:.8rem;"><span class="rpt-dot" style="background:#22c55e;"></span> Delivered</span>
+                <strong th:text="${deliveredCount}">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════ SECOND CHARTS ROW ══════════ -->
+    <div class="row g-4 mb-4">
+
+      <!-- Monthly Order Count Line Chart -->
+      <div class="col-lg-8">
+        <div class="rpt-panel">
+          <div class="rpt-panel-header">
+            <span><i class="bi bi-graph-up me-2"></i>Monthly Orders</span>
+            <span class="text-muted" style="font-size:.78rem;" th:text="${currentYear}"></span>
+          </div>
+          <div class="p-3">
+            <canvas id="ordersChart" height="100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Status -->
+      <div class="col-lg-4">
+        <div class="rpt-panel">
+          <div class="rpt-panel-header">
+            <span><i class="bi bi-credit-card me-2"></i>Payment Status</span>
+          </div>
+          <div class="p-3 d-flex flex-column align-items-center">
+            <canvas id="paymentChart" height="200" style="max-width:200px;"></canvas>
+            <div class="mt-3 w-100">
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span style="font-size:.8rem;"><span class="rpt-dot" style="background:#22c55e;"></span> Paid</span>
+                <strong th:text="${paidOrders}">0</strong>
+              </div>
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span style="font-size:.8rem;"><span class="rpt-dot" style="background:#e5e7eb;"></span> Unpaid</span>
+                <strong th:text="${unpaidOrders}">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════ RECENT ORDERS TABLE ══════════ -->
+    <div class="rpt-panel">
+      <div class="rpt-panel-header">
+        <span><i class="bi bi-clock-history me-2"></i>Recent Orders</span>
+        <span class="badge bg-secondary" th:text="${totalOrders} + ' total'"></span>
+      </div>
+
+      <div th:if="${recentOrders != null and !recentOrders.isEmpty()}">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" style="font-size:.86rem;">
+            <thead class="table-light">
+            <tr>
+              <th>Order #</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="o : ${recentOrders}">
+              <td style="font-family:monospace;font-size:.78rem;" th:text="${o.orderNumber}"></td>
+              <td th:text="${o.customerName}"></td>
+              <td class="text-muted"
+                  th:text="${#temporals.format(o.createdAt,'dd MMM yyyy')}"></td>
+              <td style="color:#c8841f;font-weight:600;"
+                  th:text="'LKR ' + ${#numbers.formatDecimal(o.totalAmount,0,2)}"></td>
+              <td>
+                <span th:if="${o.status.name() == 'PENDING'}"   class="badge bg-warning text-dark">Pending</span>
+                <span th:if="${o.status.name() == 'CONFIRMED'}" class="badge bg-info text-dark">Confirmed</span>
+                <span th:if="${o.status.name() == 'DELIVERED'}" class="badge bg-success">Delivered</span>
+              </td>
+              <td>
+                <span th:if="${o.paymentStatus.name() == 'PAID'}"  class="badge bg-success">Paid</span>
+                <span th:if="${o.paymentStatus.name() != 'PAID'}"  class="badge bg-secondary">Pending</span>
+              </td>
+              <td>
+                <a th:href="@{/admin/orders/{id}(id=${o.id})}"
+                   class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div th:if="${recentOrders == null or recentOrders.isEmpty()}"
+           class="text-center py-5 text-muted">
+        <i class="bi bi-inbox" style="font-size:2rem;opacity:.3;"></i>
+        <p class="mt-2 mb-0" style="font-size:.85rem;">No orders yet</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ CHART DATA (Thymeleaf → JS) ══════════ -->
+  <script th:inline="javascript">
+    const monthLabels      = /*[[${monthlyRevenue.keySet()}]]*/ [];
+    const revenueData      = /*[[${monthlyRevenue.values()}]]*/ [];
+    const orderCountData   = /*[[${monthlyOrderCount.values()}]]*/ [];
+    const pendingCount     = /*[[${pendingCount}]]*/ 0;
+    const confirmedCount   = /*[[${confirmedCount}]]*/ 0;
+    const deliveredCount   = /*[[${deliveredCount}]]*/ 0;
+    const paidOrders       = /*[[${paidOrders}]]*/ 0;
+    const unpaidOrders     = /*[[${unpaidOrders}]]*/ 0;
+  </script>
+
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script>
+    const commonFont = { family: 'system-ui, sans-serif', size: 12 };
+    Chart.defaults.font = commonFont;
+
+    // ── Monthly Revenue Bar Chart ──
+    new Chart(document.getElementById('revenueChart'), {
+      type: 'bar',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Revenue (LKR)',
+          data: revenueData,
+          backgroundColor: 'rgba(200,132,31,0.15)',
+          borderColor: '#c8841f',
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: '#f3f4f6' },
+            ticks: {
+              callback: v => 'LKR ' + v.toLocaleString()
+            }
+          },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    // ── Order Status Doughnut ──
+    new Chart(document.getElementById('statusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Pending', 'Confirmed', 'Delivered'],
+        datasets: [{
+          data: [pendingCount, confirmedCount, deliveredCount],
+          backgroundColor: ['#f59e0b', '#3b82f6', '#22c55e'],
+          borderWidth: 0,
+          hoverOffset: 6,
+        }]
+      },
+      options: {
+        cutout: '70%',
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // ── Monthly Orders Line Chart ──
+    new Chart(document.getElementById('ordersChart'), {
+      type: 'line',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Orders',
+          data: orderCountData,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.08)',
+          borderWidth: 2,
+          pointBackgroundColor: '#3b82f6',
+          pointRadius: 4,
+          tension: 0.4,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: '#f3f4f6' },
+            ticks: { stepSize: 1 }
+          },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    // ── Payment Doughnut ──
+    new Chart(document.getElementById('paymentChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Paid', 'Unpaid'],
+        datasets: [{
+          data: [paidOrders, unpaidOrders],
+          backgroundColor: ['#22c55e', '#e5e7eb'],
+          borderWidth: 0,
+          hoverOffset: 6,
+        }]
+      },
+      options: {
+        cutout: '70%',
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+
+  <style>
+    .rpt-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      height: 100%;
+      transition: box-shadow .2s ease;
+    }
+    .rpt-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+    .rpt-card-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+    .rpt-card-value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.15;
+    }
+    .rpt-card-sub {
+      font-size: .74rem;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .rpt-panel {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .rpt-panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: .84rem;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .rpt-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+  </style>
+
+</main>
+</html>
